@@ -9,6 +9,7 @@ public class Teleop extends OpMode {
 
     @Override
     public void init() {
+
         robot.init(hardwareMap, telemetry, gamepad1, gamepad2);
         robot.teleopInit();
     }

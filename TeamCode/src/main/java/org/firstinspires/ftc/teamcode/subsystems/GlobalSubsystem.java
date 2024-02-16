@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -23,7 +25,7 @@ public class GlobalSubsystem extends SubsystemBase {
     }
 
     public void init(Telemetry telemetry, HardwareMap hardwareMap) {
-        this.telemetry = telemetry;
+        this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         this.hardwareMap = hardwareMap;
 
         List<LynxModule> hubs = hardwareMap.getAll(LynxModule.class);

@@ -54,16 +54,27 @@ public class Robot {
 
     public void teleopInit() {
         robotDrive.setDefaultCommand(new RunCommand(() -> {
-            double slowdownFactor = 1 - pilotController.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) * 0.75;
-            slowdownFactor *= 1 - pilotController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) * 0.75;
+//            double slowdownFactor = 1 - pilotController.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) * 0.75;
+//            slowdownFactor *= 1 - pilotController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) * 0.75;
+
+            final double movementSlowdown = 1 - pilotController.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) * 0.85;
+            final double rotationSlowdown = 1 - pilotController.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) * 0.85;
             robotDrive.drive(new ChassisSpeeds(
-                    pilotController.getLeftX() * slowdownFactor * Constants.DriveConstants.MAX_MOVEMENT_PER_SECOND,
-                    pilotController.getLeftY() * slowdownFactor * Constants.DriveConstants.MAX_MOVEMENT_PER_SECOND,
-                    pilotController.getRightX() * slowdownFactor * Constants.DriveConstants.MAX_ROTATION_PER_SECOND
+                    pilotController.getLeftX() * movementSlowdown * Constants.DriveConstants.MAX_MOVEMENT_PER_SECOND,
+                    pilotController.getLeftY() * movementSlowdown * Constants.DriveConstants.MAX_MOVEMENT_PER_SECOND,
+                    pilotController.getRightX() * rotationSlowdown * Constants.DriveConstants.MAX_ROTATION_PER_SECOND
             ), true);
+
+            if (pilotController.wasJustPressed(GamepadKeys.Button.START)) {
+                robotDrive.resetGyro();
+            }
         }, robotDrive));
 
         robotArm.setDefaultCommand(new RunCommand(() -> {
+            if (copilotController.isDown(GamepadKeys.Button.BACK)) {
+                robotArm.resetBottom();
+            }
+
             robotArm.rotateArm(
                     (copilotController.isDown(GamepadKeys.Button.DPAD_UP) ? 1 : 0) +
                             (copilotController.isDown(GamepadKeys.Button.DPAD_DOWN) ? -1 : 0)
@@ -76,24 +87,23 @@ public class Robot {
                     (copilotController.isDown(GamepadKeys.Button.DPAD_RIGHT) ? 1 : 0) +
                             (copilotController.isDown(GamepadKeys.Button.DPAD_LEFT) ? -1 : 0)
             );
-            if (copilotController.wasJustPressed(GamepadKeys.Button.Y)) {
+
+            if (copilotController.isDown(GamepadKeys.Button.B)) {
                 robotArm.setWristTarget(ArmConstants.WRIST_PARALLEL_TO_GROUND);
+            }
+
+            if (pilotController.isDown(GamepadKeys.Button.X)) {
+                robotArm.setOverride(ArmConstants.ROTATION_PASS_DEGREE, ArmConstants.WRIST_HIGH_DEGREE);
             }
         }, robotArm));
 
         robotHand.setDefaultCommand(new RunCommand(() -> {
-//            if (copilotController.wasJustPressed(GamepadKeys.Button.LEFT_BUMPER)) {
-//                robotHand.toggleLeftState();
-//            }
-//            if (copilotController.wasJustPressed(Game padKeys.Button.RIGHT_BUMPER)) {
-//                robotHand.toggleRightState();
-//            }
             robotHand.setLeftState(copilotController.isDown(GamepadKeys.Button.LEFT_BUMPER));
             robotHand.setRightState(copilotController.isDown(GamepadKeys.Button.RIGHT_BUMPER));
         }, robotHand));
 
         robotPlane.setDefaultCommand(new RunCommand(() -> robotPlane.drive(
-                (copilotController.isDown(GamepadKeys.Button.B) ? 1 : 0)
+                (copilotController.isDown(GamepadKeys.Button.Y) ? 1 : 0)
         ), robotPlane));
     }
 

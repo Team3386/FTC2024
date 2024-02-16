@@ -13,8 +13,8 @@ import org.firstinspires.ftc.teamcode.utils.AnalogEncoder;
 
 public class ArmSubsystem extends SubsystemBase {
     private static final ArmSubsystem INSTANCE = new ArmSubsystem();
-    private final PIDFController rotationController = new PIDFController(1, 0, 0, 0);
-    private final PIDFController wristController = new PIDFController(0.015, 0, 0, 0);
+    private final PIDFController rotationController = new PIDFController(0.6, 0, 0, 0);
+    private final PIDFController wristController = new PIDFController(0.01, 0, 0, 0);
 
     private final PIDFController extendController = new PIDFController(1, 0, 0, 0);
     private MotorEx rotationMotor;
@@ -26,6 +26,9 @@ public class ArmSubsystem extends SubsystemBase {
     private DigitalChannel topLimit, bottomLimit;
 
     private Telemetry telemetry;
+
+    private double overrideRotation, overrideWrist;
+    private boolean override, overrideWristLimit;
 
     private ArmSubsystem() {
     }
@@ -58,7 +61,7 @@ public class ArmSubsystem extends SubsystemBase {
         bottomLimit.setMode(DigitalChannel.Mode.INPUT);
 
         rotationController.setSetPoint(rotationEncoder.getRotation());
-        rotationController.setTolerance(5);
+        rotationController.setTolerance(6);
 
         wristController.setSetPoint(wristMotor.getCurrentPosition());
         wristController.setTolerance(5);
@@ -67,25 +70,33 @@ public class ArmSubsystem extends SubsystemBase {
 
     public void rotateArm(double power) {
         final double currentRotation = rotationEncoder.getRotation();
-        if (power == 0 && !rotationController.atSetPoint()) {
+//        if (power == 0 && !rotationController.atSetPoint() && !override) {
+//            rotationController.setSetPoint(MathUtils.clamp(
+//                    currentRotation,
+//                    ArmConstants.ROTATION_LOW_DEGREE,
+//                    ArmConstants.ROTATION_HIGH_DEGREE
+//            ));
+//        }
+        if (Math.abs(power) > 0) {
             rotationController.setSetPoint(MathUtils.clamp(
-                    currentRotation,
+                    MathUtils.clamp(
+                            rotationController.getSetPoint() + power * 2,
+                            currentRotation - 20,
+                            currentRotation + 20
+                    ),
                     ArmConstants.ROTATION_LOW_DEGREE,
                     ArmConstants.ROTATION_HIGH_DEGREE
             ));
         }
-        rotationController.setSetPoint(MathUtils.clamp(
-                MathUtils.clamp(
-                        rotationController.getSetPoint() + power * 2,
-                        currentRotation - 20,
-                        currentRotation + 20
-                ),
-                ArmConstants.ROTATION_LOW_DEGREE,
-                ArmConstants.ROTATION_HIGH_DEGREE
-        ));
     }
 
     public void rotateWrist(double power) {
+        if (overrideWristLimit) {
+            wristController.setSetPoint(wristController.getSetPoint() + power * 2);
+            overrideWristLimit = false;
+            return;
+        }
+
         wristController.setSetPoint(MathUtils.clamp(
                 wristController.getSetPoint() + power * 2,
                 ArmConstants.WRIST_LOW_DEGREE,
@@ -113,11 +124,36 @@ public class ArmSubsystem extends SubsystemBase {
         }
     }
 
+    public void setOverride(double rotation, double wrist) {
+        overrideRotation = rotation;
+        overrideWrist = wrist;
+        override = true;
+    }
+
+    public void resetBottom() {;
+        wristMotor.resetEncoder();
+        wristController.setSetPoint(wristMotor.getCurrentPosition());
+        overrideWristLimit = true;
+    }
 
     @Override
     public void periodic() {
-        final double rotationPower = rotationController.calculate(rotationEncoder.getRotation());
-        final double wristPower = wristController.calculate(wristMotor.getCurrentPosition());
+
+        double rotationPower, wristPower;
+        double tempRotation = 0, tempWrist = 0;
+
+        if (!override) {
+            rotationPower = rotationController.calculate(rotationEncoder.getRotation());
+            wristPower = wristController.calculate(wristMotor.getCurrentPosition());
+        } else {
+            tempRotation = rotationController.getSetPoint();
+            tempWrist = wristController.getSetPoint();
+
+            rotationPower = rotationController.calculate(rotationEncoder.getRotation(), overrideRotation);
+            wristPower = wristController.calculate(wristMotor.getCurrentPosition(), overrideWrist);
+
+            wristPower = Math.min(wristPower, 0.75);
+        }
         telemetry.addData("Arm rotation", rotationEncoder.getRotation());
         telemetry.addData("Arm rotation target", rotationController.getSetPoint());
         telemetry.addData("Arm rotation at point", rotationController.atSetPoint());
@@ -130,16 +166,40 @@ public class ArmSubsystem extends SubsystemBase {
         telemetry.addData("Bottom", bottomLimit.getState());
         telemetry.addData("Extend motor Speed", extendMotor.getVelocity());
         telemetry.addData("Extend motor position", extendMotor.getCurrentPosition());
+
+        double factor;
+
+        if (rotationEncoder.getRotation() > ArmConstants.ROTATION_MIDDLE_DEGREE) {
+            factor = (ArmConstants.ROTATION_HIGH_DEGREE - rotationEncoder.getRotation()) / (ArmConstants.ROTATION_HIGH_DEGREE - ArmConstants.ROTATION_MIDDLE_DEGREE);
+        } else {
+            factor = (rotationEncoder.getRotation() - ArmConstants.ROTATION_LOW_DEGREE) / (ArmConstants.ROTATION_MIDDLE_DEGREE - ArmConstants.ROTATION_LOW_DEGREE);
+        }
+        factor = Math.min(factor, 1);
+        factor *= factor;
+        telemetry.addData("factor", factor);
+
+        if (!((rotationEncoder.getRotation() > ArmConstants.ROTATION_MIDDLE_DEGREE && rotationPower < 0)
+        || (rotationEncoder.getRotation() < ArmConstants.ROTATION_MIDDLE_DEGREE && rotationPower > 0))) {
+            rotationPower *= factor;
+        }
+
         if (!rotationController.atSetPoint()) {
             rotationMotor.set(rotationPower);
         } else {
             rotationMotor.set(0);
         }
 
-        if (!wristController.atSetPoint() && Math.abs(wristPower) > 0.25) {
+        if (!wristController.atSetPoint()) {
             wristMotor.set(wristPower);
         } else {
             wristMotor.set(0);
+        }
+
+        if (override) {
+            rotationController.setSetPoint(tempRotation);
+            wristController.setSetPoint(tempWrist);
+
+            override = false;
         }
     }
 }

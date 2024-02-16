@@ -116,4 +116,8 @@ public class DriveSubsystem extends SubsystemBase {
 
         telemetry.addData("Estimated Pose", odometry.getPoseMeters());
     }
+
+    public void resetGyro() {
+        imu.reset();
+    }
 }

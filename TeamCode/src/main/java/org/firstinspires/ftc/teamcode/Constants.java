@@ -28,16 +28,18 @@ public final class Constants {
         public static final String BOTTOM_LIMIT_SWITCH_NAME = "bottomLimit";
 
         public static final double ROTATION_HIGH_DEGREE = 2540;
-        public static final double ROTATION_LOW_DEGREE = 2400;
+        public static final double ROTATION_LOW_DEGREE = 2395;
+        public static final double ROTATION_PASS_DEGREE = 2418;
+        public static final double ROTATION_MIDDLE_DEGREE = 2455;
 
         public static final double WRIST_HIGH_DEGREE = -5;
-        public static final double WRIST_LOW_DEGREE = -120;
-        public static final double WRIST_PARALLEL_TO_GROUND = -70;
+        public static final double WRIST_LOW_DEGREE = -140;
+        public static final double WRIST_PARALLEL_TO_GROUND = -80;
     }
 
     public static class DriveConstants {
         public static final double MAX_MOVEMENT_PER_SECOND = 300;
-        public static final double MAX_ROTATION_PER_SECOND = 300 * Math.PI;
+        public static final double MAX_ROTATION_PER_SECOND = 300;
 
         public static final String FRONT_LEFT_MOTOR_NAME = "frontLeft";
         public static final String FRONT_RIGHT_MOTOR_NAME = "frontRight";
