@@ -26,6 +26,7 @@ public class RevIMU extends GyroEx {
      * Offset between global heading and relative heading
      */
     double offset;
+    private AxesOrder axesOrder = AxesOrder.ZXY;
     private int multiplier;
 
     /**
@@ -81,7 +82,7 @@ public class RevIMU extends GyroEx {
      */
     @Override
     public double getAbsoluteHeading() {
-        return IMU.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZXY, AngleUnit.DEGREES).firstAngle * multiplier;
+        return IMU.getAngularOrientation(AxesReference.INTRINSIC, axesOrder, AngleUnit.RADIANS).firstAngle * multiplier;
     }
 
     /**
@@ -89,7 +90,7 @@ public class RevIMU extends GyroEx {
      */
     public double[] getAngles() {
         // make a singular hardware call
-        Orientation orientation = IMU.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZXY, AngleUnit.DEGREES);
+        Orientation orientation = IMU.getAngularOrientation(AxesReference.INTRINSIC, axesOrder, AngleUnit.RADIANS);
 
         return new double[]{
                 orientation.firstAngle,
@@ -98,12 +99,16 @@ public class RevIMU extends GyroEx {
         };
     }
 
+    public void setAxesOrder(AxesOrder newOrder) {
+        axesOrder = newOrder;
+    }
+
     /**
      * @return Transforms heading into {@link Rotation2d}
      */
     @Override
     public Rotation2d getRotation2d() {
-        return Rotation2d.fromDegrees(getHeading());
+        return new Rotation2d(getHeading());
     }
 
     @Override

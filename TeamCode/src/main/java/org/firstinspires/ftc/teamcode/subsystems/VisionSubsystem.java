@@ -1,25 +1,42 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.arcrobotics.ftclib.geometry.Pose2d;
+import com.arcrobotics.ftclib.geometry.Translation2d;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.utils.ObjectProcessor;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.teamcode.Constants;
+import org.firstinspires.ftc.teamcode.Constants.VisionConstants;
+import org.firstinspires.ftc.teamcode.utils.TempProcessor;
+import org.firstinspires.ftc.teamcode.utils.ncnnprocessor.DetectedObject;
+import org.firstinspires.ftc.teamcode.utils.ncnnprocessor.NcnnProcessor;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 public class VisionSubsystem extends SubsystemBase {
     private static final VisionSubsystem INSTANCE = new VisionSubsystem();
-
+    private final List<DetectedObject> ncnnResults = new ArrayList<>();
     private VisionPortal frontWebcam;
-    private VisionPortal rearWebcam;
-    private AprilTagProcessor frontAprilTag;
-    private ObjectProcessor frontObject;
-    private AprilTagProcessor rearAprilTag;
+    private TempProcessor processors;
+    private List<AprilTagDetection> aprilTagResults = new ArrayList<>();
+    private List<Recognition> tfResults = new ArrayList<>();
+    private Translation2d visionEstimatedPosition = new Translation2d();
+
+    private int propPos = 0;
+    private boolean fixProp;
 
     private VisionSubsystem() {
     }
@@ -31,30 +48,119 @@ public class VisionSubsystem extends SubsystemBase {
     public void init() {
         HardwareMap hardwareMap = GlobalSubsystem.getInstance().hardwareMap;
 
-        frontAprilTag = new AprilTagProcessor.Builder().build();
-        rearAprilTag = new AprilTagProcessor.Builder().build();
-        frontObject = new ObjectProcessor();
+        AprilTagProcessor frontAprilTag = new AprilTagProcessor.Builder().setNumThreads(1).setOutputUnits(DistanceUnit.CM, AngleUnit.RADIANS).build();
+        frontAprilTag.setPoseSolver(AprilTagProcessor.PoseSolver.OPENCV_ITERATIVE);
+
+        NcnnProcessor ncnnProcessor = new NcnnProcessor(
+                "models/nanodet_m-int8.param", "models/nanodet_m-int8.bin",
+                new int[]{320, 320}, new float[]{103.53f, 116.28f, 123.675f},
+                new float[]{1.f / 57.375f, 1.f / 57.12f, 1.f / 58.395f},
+                0.5f,
+                1
+        );
+
+        TfodProcessor tf = new TfodProcessor.Builder()
+                .setModelFileName("Prop.tflite")
+                .setModelLabels(new String[]{"Prop"}).build();
+
+        tf.setMinResultConfidence(0.8f);
+
+        processors = new TempProcessor(frontAprilTag, tf);
 
         VisionPortal.Builder frontBuilder = new VisionPortal.Builder();
         frontBuilder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
-        frontBuilder.addProcessor(frontAprilTag);
-        frontBuilder.addProcessor(frontObject);
+        frontBuilder.addProcessor(processors);
         frontWebcam = frontBuilder.build();
 
 //        VisionPortal.Builder rearBuilder = new VisionPortal.Builder();
 //        rearBuilder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 2"));
 //        rearBuilder.addProcessor(rearAprilTag);
 //        rearWebcam = rearBuilder.build();
+        frontWebcam.resumeStreaming();
+        fixProp = false;
     }
 
+    @Override
     public void periodic() {
-        Telemetry telemetry = GlobalSubsystem.getInstance().telemetry;
+        if (processors.canAccessAprilTag()) {
+            aprilTagResults = new ArrayList<>(processors.aprilTagProcessor.getDetections());
+            OdometrySubsystem robotOdometry = OdometrySubsystem.getInstance();
+            if (!aprilTagResults.isEmpty()) {
+                Translation2d computedPosition = computePosition(aprilTagResults.get(0));
+                if (computedPosition != null) {
+                    visionEstimatedPosition = computedPosition;
+                    robotOdometry.visionResetPosition(computedPosition);
+                }
+            }
+            robotOdometry.resetVisionStore();
+        }
 
-        telemetry.addLine("Front AprilTags");
-        logAprilTagDetections(frontAprilTag.getDetections());
+        TelemetryPacket fieldPacket = GlobalSubsystem.getInstance().fieldPacket;
 
-        telemetry.addLine("Rear AprilTags");
-        logAprilTagDetections(rearAprilTag.getDetections());
+        fieldPacket.fieldOverlay().setTranslation(visionEstimatedPosition.getY() * Constants.CENTIMETER_PER_INCH_INVERSE, -visionEstimatedPosition.getX() * Constants.CENTIMETER_PER_INCH_INVERSE);
+
+        fieldPacket.fieldOverlay()
+                .setStroke("green")
+                .setRotation(0)
+                .strokeRect(-Constants.DriveConstants.TRACK_WIDTH / 2, -Constants.DriveConstants.WHEEL_BASE / 2, Constants.DriveConstants.TRACK_WIDTH, Constants.DriveConstants.WHEEL_BASE);
+
+        fieldPacket.fieldOverlay().setTranslation(0, 0);
+        for (Translation2d position : VisionConstants.APRILTAG_POSITIONS.values()) {
+            fieldPacket.fieldOverlay().strokeCircle(position.getY(), -position.getX(), 2);
+        }
+
+        if (processors.canAccessTf()) {
+            tfResults = new ArrayList<>(processors.tfProcessor.getRecognitions());
+        }
+
+        for (Recognition rec : tfResults) {
+            GlobalSubsystem.getInstance().telemetry.addData("obj", rec);
+        }
+
+        Optional<Recognition> firstRec = tfResults.stream()
+                .filter(rec -> rec.getBottom() + rec.getHeight() / 2 < 400)
+                .max(Comparator.comparingDouble(Recognition::getConfidence));
+
+        if (firstRec.isPresent() && !fixProp) {
+            Recognition recognition = firstRec.get();
+            final float x = (recognition.getLeft() + recognition.getWidth() / 2);
+            GlobalSubsystem.getInstance().telemetry.addData("center", x);
+            float third = 640f / 3f;
+            propPos = (int) (x / third);
+        }
+
+        GlobalSubsystem.getInstance().telemetry.addData("pos", propPos);
+
+        logAprilTagDetections(aprilTagResults);
+    }
+
+    private Translation2d computePosition(AprilTagDetection detection) {
+        Translation2d aprilTagPosition = VisionConstants.APRILTAG_POSITIONS.get(detection.id);
+        if (aprilTagPosition == null) {
+            return null;
+        }
+
+        Pose2d robotPose = OdometrySubsystem.getInstance().getPose();
+
+        TelemetryPacket packet = GlobalSubsystem.getInstance().fieldPacket;
+
+        Translation2d tagRelativeToCamera = new Translation2d(detection.ftcPose.x, detection.ftcPose.y);
+        Translation2d tagRelativeToRobot = tagRelativeToCamera.plus(VisionConstants.CAMERA_POSITION);
+        Translation2d tagRelativeToRobotGlobal = tagRelativeToRobot.rotateBy(robotPose.getRotation().unaryMinus());
+
+        packet.fieldOverlay().setTranslation(robotPose.getY(), -robotPose.getX()).setRotation(0);
+        packet.fieldOverlay().strokeLine(0, 0, tagRelativeToRobotGlobal.getY(), -tagRelativeToRobotGlobal.getX());
+
+        Translation2d robotRelativeToTag = tagRelativeToRobotGlobal.unaryMinus();
+
+        packet.fieldOverlay().setTranslation(aprilTagPosition.getY(), -aprilTagPosition.getX()).setRotation(0);
+        packet.fieldOverlay().strokeLine(0, 0, robotRelativeToTag.getY(), -robotRelativeToTag.getX());
+
+        if (Math.abs(robotRelativeToTag.getNorm()) > 80) {
+            return null;
+        }
+
+        return aprilTagPosition.plus(robotRelativeToTag);
     }
 
     public void logAprilTagDetections(List<AprilTagDetection> detections) {
@@ -74,5 +180,13 @@ public class VisionSubsystem extends SubsystemBase {
                 telemetry.addLine(String.format("Center %6.0f %6.0f   (pixels)", detection.center.x, detection.center.y));
             }
         }   // end for() loop
+    }
+
+    public void fixProp() {
+        fixProp = true;
+    }
+
+    public int propPos() {
+        return propPos;
     }
 }

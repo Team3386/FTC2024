@@ -83,13 +83,13 @@ public class HandSubsystem extends SubsystemBase {
         if (leftState) {
             leftServo.setPosition(HandConstants.LEFT_OPEN_POSITION);
         } else {
-            leftServo.setPosition(0);
+            leftServo.setPosition(0.45);
         }
 
         if (rightState) {
             rightServo.setPosition(HandConstants.RIGHT_OPEN_POSITION);
         } else {
-            rightServo.setPosition(0);
+            rightServo.setPosition(0.7);
         }
     }
 }

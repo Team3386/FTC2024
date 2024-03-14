@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.arcrobotics.ftclib.hardware.motors.Motor.RunMode;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
@@ -9,6 +11,10 @@ import com.arcrobotics.ftclib.kinematics.wpilibkinematics.MecanumDriveOdometry;
 import com.arcrobotics.ftclib.kinematics.wpilibkinematics.MecanumDriveWheelSpeeds;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.Constants.DriveConstants;
 import org.firstinspires.ftc.teamcode.utils.RevIMU;
 
@@ -20,7 +26,6 @@ public class DriveSubsystem extends SubsystemBase {
     private static MotorEx rearLeft;
     private static MotorEx rearRight;
     private static RevIMU imu;
-
     private static ChassisSpeeds targetChassisSpeeds = new ChassisSpeeds();
 
     private DriveSubsystem() {
@@ -38,6 +43,11 @@ public class DriveSubsystem extends SubsystemBase {
         rearLeft = new MotorEx(globalSubsystem.hardwareMap, DriveConstants.REAR_LEFT_MOTOR_NAME);
         rearRight = new MotorEx(globalSubsystem.hardwareMap, DriveConstants.REAR_RIGHT_MOTOR_NAME);
 
+        frontLeft.setVeloCoefficients(DriveConstants.MOTOR_PID[0], DriveConstants.MOTOR_PID[1], DriveConstants.MOTOR_PID[2]);
+        frontRight.setVeloCoefficients(DriveConstants.MOTOR_PID[0], DriveConstants.MOTOR_PID[1], DriveConstants.MOTOR_PID[2]);
+        rearLeft.setVeloCoefficients(DriveConstants.MOTOR_PID[0], DriveConstants.MOTOR_PID[1], DriveConstants.MOTOR_PID[2]);
+        rearRight.setVeloCoefficients(DriveConstants.MOTOR_PID[0], DriveConstants.MOTOR_PID[1], DriveConstants.MOTOR_PID[2]);
+
         frontLeft.setDistancePerPulse(DriveConstants.TICKS_TO_DISTANCE_INVERSE);
         frontRight.setDistancePerPulse(DriveConstants.TICKS_TO_DISTANCE_INVERSE);
         rearLeft.setDistancePerPulse(DriveConstants.TICKS_TO_DISTANCE_INVERSE);
@@ -51,15 +61,23 @@ public class DriveSubsystem extends SubsystemBase {
         rearLeft.setRunMode(RunMode.VelocityControl);
         rearRight.setRunMode(RunMode.VelocityControl);
 
-        imu = new RevIMU(globalSubsystem.hardwareMap);
+        imu = new RevIMU(globalSubsystem.hardwareMap, "navx");
+        imu.invertGyro();
     }
 
-    public void drive(ChassisSpeeds chassisSpeeds, boolean fieldRelative) {
+    public void drive(ChassisSpeeds chassisSpeeds, boolean fieldRelative, Rotation2d rotateBy) {
         targetChassisSpeeds = fieldRelative ?
-                ChassisSpeeds.fromFieldRelativeSpeeds(
-                        chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond,
-                        chassisSpeeds.omegaRadiansPerSecond, imu.getRotation2d())
+                fromFieldRelativeSpeeds(
+                        chassisSpeeds, odometry.getPoseMeters().getRotation().plus(rotateBy))
                 : chassisSpeeds;
+    }
+
+    private ChassisSpeeds fromFieldRelativeSpeeds(ChassisSpeeds chassisSpeeds, Rotation2d robotAngle) {
+        return new ChassisSpeeds(
+                chassisSpeeds.vxMetersPerSecond * robotAngle.getCos() - chassisSpeeds.vyMetersPerSecond * robotAngle.getSin(),
+                chassisSpeeds.vyMetersPerSecond * robotAngle.getCos() + chassisSpeeds.vxMetersPerSecond * robotAngle.getSin(),
+                chassisSpeeds.omegaRadiansPerSecond
+        );
     }
 
     @Override
@@ -85,7 +103,7 @@ public class DriveSubsystem extends SubsystemBase {
         telemetry.addData("a", frontLeft.getCPR());
 
         telemetry.addData("IMU data", imu.getRotation2d());
-        telemetry.addData("IMU raw orientation", imu.getRevIMU().getRobotYawPitchRollAngles());
+        telemetry.addData("IMU raw orientation", imu.getIMU().getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZXY, AngleUnit.DEGREES));
 
         telemetry.addData("Calculated wheel speeds", wheelSpeeds);
 
@@ -104,20 +122,51 @@ public class DriveSubsystem extends SubsystemBase {
             targetChassisSpeeds.omegaRadiansPerSecond = 0;
         }
 
-        odometry.updateWithTime(
-                GlobalSubsystem.getInstance().elapsedTime.seconds(),
-                imu.getRotation2d(), new MecanumDriveWheelSpeeds(
-                        frontLeft.getVelocity() * DriveConstants.DISTANCE_TO_TICKS,
-                        frontRight.getVelocity() * DriveConstants.DISTANCE_TO_TICKS,
-                        rearLeft.getVelocity() * DriveConstants.DISTANCE_TO_TICKS,
-                        rearRight.getVelocity() * DriveConstants.DISTANCE_TO_TICKS
-                )
+        MecanumDriveWheelSpeeds realWheelSpeeds = new MecanumDriveWheelSpeeds(
+                frontLeft.getVelocity() * DriveConstants.DISTANCE_TO_TICKS,
+                frontRight.getVelocity() * DriveConstants.DISTANCE_TO_TICKS,
+                rearLeft.getVelocity() * DriveConstants.DISTANCE_TO_TICKS,
+                rearRight.getVelocity() * DriveConstants.DISTANCE_TO_TICKS
         );
 
-        telemetry.addData("Estimated Pose", odometry.getPoseMeters());
+        odometry.updateWithTime(
+                GlobalSubsystem.getInstance().elapsedTime.seconds(),
+                imu.getRotation2d(), realWheelSpeeds
+        );
+
+        ChassisSpeeds robotState = DriveConstants.DRIVE_KINEMATICS.toChassisSpeeds(realWheelSpeeds);
+
+        Pose2d odometryPose = odometry.getPoseMeters();
+
+        TelemetryPacket fieldPacket = GlobalSubsystem.getInstance().fieldPacket;
+
+        fieldPacket.fieldOverlay().setTranslation(odometryPose.getY() * Constants.CENTIMETER_PER_INCH_INVERSE, odometryPose.getX() * Constants.CENTIMETER_PER_INCH_INVERSE);
+
+        fieldPacket.fieldOverlay()
+                .setStroke("blue")
+                .setRotation(-odometryPose.getHeading())
+                .strokeRect(-DriveConstants.TRACK_WIDTH / 2, -DriveConstants.WHEEL_BASE / 2, DriveConstants.TRACK_WIDTH, DriveConstants.WHEEL_BASE);
+
+        fieldPacket.fieldOverlay().setStroke("green")
+                .strokeLine(0, 0, -robotState.vyMetersPerSecond, 0);
+
+        fieldPacket.fieldOverlay().setStroke("red")
+                .strokeLine(0, 0, 0, -robotState.vxMetersPerSecond);
+
+        fieldPacket.fieldOverlay().setStroke("white").strokeLine(0, 0, -robotState.vyMetersPerSecond, -robotState.vxMetersPerSecond);
+
+        telemetry.addData("Estimated Pose", odometryPose);
     }
 
     public void resetGyro() {
         imu.reset();
+    }
+
+    public Pose2d getPose() {
+        return odometry.getPoseMeters();
+    }
+
+    public void resetPose(Pose2d newPose) {
+        odometry.resetPosition(newPose, imu.getRotation2d());
     }
 }
