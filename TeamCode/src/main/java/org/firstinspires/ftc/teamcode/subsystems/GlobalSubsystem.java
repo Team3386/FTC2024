@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -20,6 +21,7 @@ public class GlobalSubsystem extends SubsystemBase {
     public FtcDashboard dashboard = FtcDashboard.getInstance();
     public TelemetryPacket fieldPacket = new TelemetryPacket();
     public ElapsedTime elapsedTime = new ElapsedTime();
+    public Rotation2d driverRotation = Rotation2d.fromDegrees(-90);
     private List<LynxModule> allHubs;
 
     private GlobalSubsystem() {

@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode;
 import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.arcrobotics.ftclib.geometry.Pose2d;
-import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.arcrobotics.ftclib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -20,7 +19,7 @@ public class Teleop extends Robot {
                     pilotController.getLeftX() * movementSlowdown * Constants.DriveConstants.MAX_MOVEMENT_PER_SECOND,
                     pilotController.getLeftY() * movementSlowdown * Constants.DriveConstants.MAX_MOVEMENT_PER_SECOND,
                     pilotController.getRightX() * movementSlowdown * Constants.DriveConstants.MAX_ROTATION_PER_SECOND
-            ), true, Rotation2d.fromDegrees(90));
+            ), true, robotGlobal.driverRotation);
 
             if (pilotController.wasJustPressed(GamepadKeys.Button.START)) {
                 robotDrive.resetPose(new Pose2d().rotate(-Math.PI * 1.5));

@@ -24,6 +24,7 @@ public class AutoBlueBack extends Robot {
         super.init();
         robotDrive.resetPose(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
         robotOdometry.resetPose(new Pose2d(new Translation2d(-182.88 + (45f / 2f), -91.44), Rotation2d.fromDegrees(90)));
+        robotGlobal.driverRotation = Rotation2d.fromDegrees(90);
     }
 
     @Override
