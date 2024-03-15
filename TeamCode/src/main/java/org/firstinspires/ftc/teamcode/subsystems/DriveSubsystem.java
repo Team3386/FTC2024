@@ -84,28 +84,23 @@ public class DriveSubsystem extends SubsystemBase {
     public void periodic() {
         Telemetry telemetry = GlobalSubsystem.getInstance().telemetry;
 
-        telemetry.addData("Target Chassis X", targetChassisSpeeds.vxMetersPerSecond);
-        telemetry.addData("Target Chassis Y", targetChassisSpeeds.vyMetersPerSecond);
-        telemetry.addData("Target Chassis Rad", targetChassisSpeeds.omegaRadiansPerSecond);
+        telemetry.addData("Drive: Target Chassis X", targetChassisSpeeds.vxMetersPerSecond);
+        telemetry.addData("Drive: Target Chassis Y", targetChassisSpeeds.vyMetersPerSecond);
+        telemetry.addData("Drive: Target Chassis Rad", targetChassisSpeeds.omegaRadiansPerSecond);
 
         targetChassisSpeeds.vxMetersPerSecond = -targetChassisSpeeds.vxMetersPerSecond;
 
         MecanumDriveWheelSpeeds wheelSpeeds = DriveConstants.DRIVE_KINEMATICS.toWheelSpeeds(targetChassisSpeeds);
 
-        telemetry.addData("frontleft", frontLeft.getVelocity());
-        telemetry.addData("frontright", frontRight.getVelocity());
-        telemetry.addData("rearleft", rearLeft.getVelocity());
-        telemetry.addData("rearright", rearRight.getVelocity());
-        telemetry.addData("frontleft", frontLeft.getDistance());
-        telemetry.addData("frontright", frontRight.getDistance());
-        telemetry.addData("rearleft", rearLeft.getDistance());
-        telemetry.addData("rearright", rearRight.getDistance());
-        telemetry.addData("a", frontLeft.getCPR());
+        telemetry.addData("Drive: Velocity frontLeft", frontLeft.getVelocity());
+        telemetry.addData("Drive: Velocity frontRight", frontRight.getVelocity());
+        telemetry.addData("Drive: Velocity rearLeft", rearLeft.getVelocity());
+        telemetry.addData("Drive: Velocity rearRight", rearRight.getVelocity());
 
-        telemetry.addData("IMU data", imu.getRotation2d());
-        telemetry.addData("IMU raw orientation", imu.getIMU().getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZXY, AngleUnit.DEGREES));
+        telemetry.addData("Drive: IMU Rotation", imu.getRotation2d());
+        telemetry.addData("Drive: IMU Raw Orientation", imu.getIMU().getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZXY, AngleUnit.DEGREES));
 
-        telemetry.addData("Calculated wheel speeds", wheelSpeeds);
+        telemetry.addData("Drive: Calculated wheel speeds", wheelSpeeds);
 
         frontLeft.setVelocity(wheelSpeeds.frontLeftMetersPerSecond * DriveConstants.DISTANCE_TO_TICKS_INVERSE);
         frontRight.setVelocity(wheelSpeeds.frontRightMetersPerSecond * DriveConstants.DISTANCE_TO_TICKS_INVERSE);
@@ -155,7 +150,7 @@ public class DriveSubsystem extends SubsystemBase {
 
         fieldPacket.fieldOverlay().setStroke("white").strokeLine(0, 0, -robotState.vyMetersPerSecond, -robotState.vxMetersPerSecond);
 
-        telemetry.addData("Estimated Pose", odometryPose);
+        telemetry.addData("Drive: Estimated Pose", odometryPose);
     }
 
     public void resetGyro() {

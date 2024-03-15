@@ -22,12 +22,16 @@ public class Constants {
         public static double MOTION_BUDGET = 150;
 
         public static double[] ARM_ROTATION_PID = {1, 0, 0};
-        public static double[] ARM_WRIST_PID = {0.0005, 0, 0};
-        public static double[] ARM_EXTEND_PID = {0.15, 0, 0};
+        public static double[] ARM_WRIST_PID = {0.0055, 0, 0};
+        public static double[] ARM_EXTEND_PID = {0.18, 0, 0};
 
-        public static double ARM_ROTATION_PASS = 28;
-        public static double ARM_ROTATION_BACKBOARD = 70;
-        public static double ARM_ROTATION_PICKUP = 10;
+        public static double ARM_ROTATION_PASS = 25;
+        public static double ARM_ROTATION_BACKBOARD = 40;
+        public static double ARM_ROTATION_PICKUP = 0;
+
+        public static double ARM_EXTEND_TOP = 210;
+        public static double ARM_EXTEND_BOTTOM = 132;
+        public static double ARM_EXTEND_PICKUP = 175;
     }
 
     @Config
@@ -107,8 +111,6 @@ public class Constants {
         public static String RIGHT_SERVO_NAME = "handRight";
         public static double LEFT_OPEN_POSITION = 0.15;
         public static double RIGHT_OPEN_POSITION = 0;
-
-
     }
 
     @Config

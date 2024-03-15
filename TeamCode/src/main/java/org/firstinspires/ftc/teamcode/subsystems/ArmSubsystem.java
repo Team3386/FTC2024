@@ -10,7 +10,6 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Constants.ArmConstants;
 import org.firstinspires.ftc.teamcode.utils.AnalogEncoder;
 
-
 public class ArmSubsystem extends SubsystemBase {
     private static final ArmSubsystem INSTANCE = new ArmSubsystem();
     private MotorEx rotationMotor;
@@ -51,6 +50,8 @@ public class ArmSubsystem extends SubsystemBase {
         rotationMotor.setInverted(true);
         extendMotor.setInverted(true);
 
+        wristMotor.resetEncoder();
+
         rotationEncoder = new AnalogEncoder(ArmConstants.ROTATION_ENCODER_NAME, 270);
         extendEncoder = new AnalogEncoder(ArmConstants.EXTEND_ENCODER_NAME, 360);
 
@@ -66,7 +67,6 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     public void setRotationMotor(double power) {
-
         if ((rotationEncoder.getRotation() <= 0.09 && power < 0) || (rotationEncoder.getRotation() >= 250 && power > 0)) {
             rotationMotor.set(0);
         } else {

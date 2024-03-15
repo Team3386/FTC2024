@@ -8,7 +8,7 @@ import com.arcrobotics.ftclib.kinematics.wpilibkinematics.ChassisSpeeds;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 
-@TeleOp(name = "Teleop")
+@TeleOp
 public class Teleop extends Robot {
     @Override
     public void start() {
@@ -20,7 +20,7 @@ public class Teleop extends Robot {
                     pilotController.getLeftX() * movementSlowdown * Constants.DriveConstants.MAX_MOVEMENT_PER_SECOND,
                     pilotController.getLeftY() * movementSlowdown * Constants.DriveConstants.MAX_MOVEMENT_PER_SECOND,
                     pilotController.getRightX() * movementSlowdown * Constants.DriveConstants.MAX_ROTATION_PER_SECOND
-            ), true, new Rotation2d());
+            ), true, Rotation2d.fromDegrees(90));
 
             if (pilotController.wasJustPressed(GamepadKeys.Button.START)) {
                 robotDrive.resetPose(new Pose2d().rotate(-Math.PI * 1.5));

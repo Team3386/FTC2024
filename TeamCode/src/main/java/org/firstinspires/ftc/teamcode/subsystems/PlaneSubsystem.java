@@ -40,7 +40,6 @@ public class PlaneSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        telemetry.addData("plane angle", planeServo.getAngle());
-        telemetry.addData("plane angle", planeServo.getPosition());
+        telemetry.addData("Plane: Position", planeServo.getPosition());
     }
 }

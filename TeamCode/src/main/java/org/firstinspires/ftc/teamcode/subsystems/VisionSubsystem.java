@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.geometry.Pose2d;
@@ -13,6 +14,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.Constants.VisionConstants;
+import org.firstinspires.ftc.teamcode.utils.CameraStreamProcessor;
 import org.firstinspires.ftc.teamcode.utils.TempProcessor;
 import org.firstinspires.ftc.teamcode.utils.ncnnprocessor.DetectedObject;
 import org.firstinspires.ftc.teamcode.utils.ncnnprocessor.NcnnProcessor;
@@ -31,6 +33,8 @@ public class VisionSubsystem extends SubsystemBase {
     private final List<DetectedObject> ncnnResults = new ArrayList<>();
     private VisionPortal frontWebcam;
     private TempProcessor processors;
+
+    private CameraStreamProcessor stream;
     private List<AprilTagDetection> aprilTagResults = new ArrayList<>();
     private List<Recognition> tfResults = new ArrayList<>();
     private Translation2d visionEstimatedPosition = new Translation2d();
@@ -49,7 +53,6 @@ public class VisionSubsystem extends SubsystemBase {
         HardwareMap hardwareMap = GlobalSubsystem.getInstance().hardwareMap;
 
         AprilTagProcessor frontAprilTag = new AprilTagProcessor.Builder().setNumThreads(1).setOutputUnits(DistanceUnit.CM, AngleUnit.RADIANS).build();
-        frontAprilTag.setPoseSolver(AprilTagProcessor.PoseSolver.OPENCV_ITERATIVE);
 
         NcnnProcessor ncnnProcessor = new NcnnProcessor(
                 "models/nanodet_m-int8.param", "models/nanodet_m-int8.bin",
@@ -63,14 +66,17 @@ public class VisionSubsystem extends SubsystemBase {
                 .setModelFileName("Prop.tflite")
                 .setModelLabels(new String[]{"Prop"}).build();
 
-        tf.setMinResultConfidence(0.8f);
-
         processors = new TempProcessor(frontAprilTag, tf);
+        stream = new CameraStreamProcessor();
 
         VisionPortal.Builder frontBuilder = new VisionPortal.Builder();
-        frontBuilder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
-        frontBuilder.addProcessor(processors);
+        frontBuilder
+                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .addProcessor(processors)
+                .addProcessor(stream);
         frontWebcam = frontBuilder.build();
+
+        FtcDashboard.getInstance().startCameraStream(stream, 0);
 
 //        VisionPortal.Builder rearBuilder = new VisionPortal.Builder();
 //        rearBuilder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 2"));
@@ -86,10 +92,14 @@ public class VisionSubsystem extends SubsystemBase {
             aprilTagResults = new ArrayList<>(processors.aprilTagProcessor.getDetections());
             OdometrySubsystem robotOdometry = OdometrySubsystem.getInstance();
             if (!aprilTagResults.isEmpty()) {
-                Translation2d computedPosition = computePosition(aprilTagResults.get(0));
-                if (computedPosition != null) {
-                    visionEstimatedPosition = computedPosition;
-                    robotOdometry.visionResetPosition(computedPosition);
+                Optional<AprilTagDetection> detected = aprilTagResults.stream()
+                        .filter(det -> VisionConstants.APRILTAG_POSITIONS.containsKey(det.id)).findFirst();
+                if (detected.isPresent()) {
+                    Translation2d computedPosition = computePosition(detected.get());
+                    if (computedPosition != null) {
+                        visionEstimatedPosition = computedPosition;
+                        robotOdometry.visionResetPosition(computedPosition);
+                    }
                 }
             }
             robotOdometry.resetVisionStore();
@@ -114,22 +124,22 @@ public class VisionSubsystem extends SubsystemBase {
         }
 
         for (Recognition rec : tfResults) {
-            GlobalSubsystem.getInstance().telemetry.addData("obj", rec);
+            GlobalSubsystem.getInstance().telemetry.addData(String.format("Vision: Detected object", rec.getWidth()), rec);
         }
 
+        // NOTE: The Y coordinates of the results are flipped
         Optional<Recognition> firstRec = tfResults.stream()
-                .filter(rec -> rec.getBottom() + rec.getHeight() / 2 < 400)
-                .max(Comparator.comparingDouble(Recognition::getConfidence));
+                .max(Comparator.comparingDouble(rec -> rec.getBottom() - rec.getHeight() / 2));
 
         if (firstRec.isPresent() && !fixProp) {
             Recognition recognition = firstRec.get();
             final float x = (recognition.getLeft() + recognition.getWidth() / 2);
-            GlobalSubsystem.getInstance().telemetry.addData("center", x);
+            GlobalSubsystem.getInstance().telemetry.addData("Vision: Detected prop center", x);
             float third = 640f / 3f;
             propPos = (int) (x / third);
         }
 
-        GlobalSubsystem.getInstance().telemetry.addData("pos", propPos);
+        GlobalSubsystem.getInstance().telemetry.addData("Vision: Prop position", propPos);
 
         logAprilTagDetections(aprilTagResults);
     }
@@ -166,7 +176,7 @@ public class VisionSubsystem extends SubsystemBase {
     public void logAprilTagDetections(List<AprilTagDetection> detections) {
         Telemetry telemetry = GlobalSubsystem.getInstance().telemetry;
 
-        telemetry.addData("# AprilTags Detected", detections.size());
+        telemetry.addData("Vision: # AprilTags Detected", detections.size());
 
         // Step through the list of detections and display info for each one.
         for (AprilTagDetection detection : detections) {

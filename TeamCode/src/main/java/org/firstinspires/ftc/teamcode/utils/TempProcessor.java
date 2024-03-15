@@ -17,10 +17,10 @@ import java.util.concurrent.Future;
 public class TempProcessor implements VisionProcessor {
     public final AprilTagProcessor aprilTagProcessor;
     public final TfodProcessor tfProcessor;
+    private final Future<Object> aprilTagFuture;
+    private final Future<Object> tfFuture;
     private boolean aprilTagLockedForAccess;
     private boolean tfLockedForAccess;
-    private Future<Object> aprilTagFuture;
-    private Future<Object> tfFuture;
 
     public TempProcessor(AprilTagProcessor aprilTag, TfodProcessor tf) {
         aprilTagProcessor = aprilTag;
@@ -39,28 +39,34 @@ public class TempProcessor implements VisionProcessor {
     public Object processFrame(Mat frame, long captureTimeNanos) {
         ExecutorService threadPool = ThreadPool.getDefault();
 
-        if (!aprilTagLockedForAccess && aprilTagFuture.isDone()) {
-            aprilTagLockedForAccess = true;
-            aprilTagFuture = threadPool.submit(() -> aprilTagProcessor.processFrame(frame, captureTimeNanos));
-        }
+//        if (!aprilTagLockedForAccess && aprilTagFuture.isDone()) {
+//            aprilTagLockedForAccess = true;
+//            aprilTagFuture = threadPool.submit(() -> aprilTagProcessor.processFrame(frame, captureTimeNanos));
+//        }
+//
+//        if (!tfLockedForAccess && tfFuture.isDone()) {
+//            tfLockedForAccess = true;
+//            tfFuture = threadPool.submit(() -> tfProcessor.processFrame(frame, captureTimeNanos));
+//        }
 
-        if (!tfLockedForAccess && tfFuture.isDone()) {
-            tfLockedForAccess = true;
-            tfFuture = threadPool.submit(() -> tfProcessor.processFrame(frame, captureTimeNanos));
-        }
+        aprilTagLockedForAccess = true;
+        tfLockedForAccess = true;
+        tfProcessor.processFrame(frame, captureTimeNanos);
+        aprilTagProcessor.processFrame(frame, captureTimeNanos);
 
         return null;
     }
 
     @Override
     public void onDrawFrame(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
-        if (aprilTagFuture.isDone()) {
-            aprilTagProcessor.onDrawFrame(canvas, onscreenWidth, onscreenHeight, scaleBmpPxToCanvasPx, scaleCanvasDensity, userContext);
-        }
-
-        if (tfFuture.isDone()) {
-            tfProcessor.onDrawFrame(canvas, onscreenWidth, onscreenHeight, scaleBmpPxToCanvasPx, scaleCanvasDensity, userContext);
-        }
+//        if (aprilTagFuture.isDone()) {
+//            aprilTagProcessor.onDrawFrame(canvas, onscreenWidth, onscreenHeight, scaleBmpPxToCanvasPx, scaleCanvasDensity, userContext);
+//        }
+        aprilTagProcessor.onDrawFrame(canvas, onscreenWidth, onscreenHeight, scaleBmpPxToCanvasPx, scaleCanvasDensity, userContext);
+        tfProcessor.onDrawFrame(canvas, onscreenWidth, onscreenHeight, scaleBmpPxToCanvasPx, scaleCanvasDensity, userContext);
+//        if (tfFuture.isDone()) {
+//            tfProcessor.onDrawFrame(canvas, onscreenWidth, onscreenHeight, scaleBmpPxToCanvasPx, scaleCanvasDensity, userContext);
+//        }
     }
 
     public boolean canAccessAprilTag() {

@@ -76,15 +76,6 @@ public class OdometrySubsystem extends SubsystemBase {
     public void periodic() {
         calculatePose();
 
-        GlobalSubsystem.getInstance().telemetry.addData("Odometry: left", leftEncoder.getDistance());
-        GlobalSubsystem.getInstance().telemetry.addData("Odometry: right", rightEncoder.getDistance());
-        GlobalSubsystem.getInstance().telemetry.addData("Odometry: center", centerEncoder.getDistance());
-
-        GlobalSubsystem.getInstance().telemetry.addData("PREVOdometry: left", prevLeftEncoder);
-        GlobalSubsystem.getInstance().telemetry.addData("PREVOdometry: right", prevRightEncoder);
-        GlobalSubsystem.getInstance().telemetry.addData("PREVOdometry: center", prevCenterEncoder);
-
-
         TelemetryPacket fieldPacket = GlobalSubsystem.getInstance().fieldPacket;
 
         fieldPacket.fieldOverlay().setTranslation(finalPose.getY() * Constants.CENTIMETER_PER_INCH_INVERSE, -finalPose.getX() * Constants.CENTIMETER_PER_INCH_INVERSE);
@@ -94,7 +85,7 @@ public class OdometrySubsystem extends SubsystemBase {
                 .setRotation(-finalPose.getHeading())
                 .strokeRect(-DriveConstants.TRACK_WIDTH / 2, -DriveConstants.WHEEL_BASE / 2, DriveConstants.TRACK_WIDTH, DriveConstants.WHEEL_BASE);
 
-        GlobalSubsystem.getInstance().telemetry.addData("Estimated Pose2", calculatedPose);
+        GlobalSubsystem.getInstance().telemetry.addData("Odometry: Estimated Pose", calculatedPose);
     }
 
     private void calculatePose() {
@@ -112,11 +103,11 @@ public class OdometrySubsystem extends SubsystemBase {
         prevCenterEncoder = centerEncoder.getDistance();
         prevRotation = drivePose.getHeading();
 
-        Telemetry aaa = GlobalSubsystem.getInstance().telemetry;
+        Telemetry telemetry = GlobalSubsystem.getInstance().telemetry;
 
-        aaa.addData("Odometry: deltal", leftDelta);
-        aaa.addData("Odometry: deltar", rightDelta);
-        aaa.addData("Odometry: deltac", centerDelta);
+        telemetry.addData("Odometry: Delta left", leftDelta);
+        telemetry.addData("Odometry: Delta right", rightDelta);
+        telemetry.addData("Odometry: Delta center", centerDelta);
 
         final double deltaX = centerDelta - (CENTER_WHEEL_OFFSET * -deltaRot);
         final double deltaY = -(leftDelta + rightDelta) / 2;

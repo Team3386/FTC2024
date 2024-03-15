@@ -42,9 +42,11 @@ public abstract class Robot extends OpMode {
     }
 
     public void init_loop() {
+        final double start = System.nanoTime();
         pilotController.readButtons();
         copilotController.readButtons();
         CommandScheduler.getInstance().run();
+        robotGlobal.telemetry.addData("=== Loop time ===", (System.nanoTime() - start) / 1e6);
     }
 
     public void loop() {
@@ -52,7 +54,7 @@ public abstract class Robot extends OpMode {
         pilotController.readButtons();
         copilotController.readButtons();
         CommandScheduler.getInstance().run();
-        robotGlobal.telemetry.addData("Loop time", (System.nanoTime() - start) / 1e6);
+        robotGlobal.telemetry.addData("=== Loop time ===", (System.nanoTime() - start) / 1e6);
     }
 
     public void stop() {

@@ -3,7 +3,9 @@ package org.firstinspires.ftc.teamcode.commands.purepursuit;
 import android.util.Log;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandBase;
+import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
@@ -29,8 +31,8 @@ import java.util.List;
 // https://github.com/Team254/FRC-2019-Public/blob/576b/src/main/java/com/team254/lib/control/AdaptivePurePursuitController.java
 
 public class PurePursuitCommand extends CommandBase {
-    private static final DriveSubsystem robotDrive = DriveSubsystem.getInstance();
-    private static final OdometrySubsystem robotOdometry = OdometrySubsystem.getInstance();
+    private final DriveSubsystem robotDrive = DriveSubsystem.getInstance();
+    private final OdometrySubsystem robotOdometry = OdometrySubsystem.getInstance();
 
     private final PIDFController xController;
     private final PIDFController yController;
@@ -44,6 +46,8 @@ public class PurePursuitCommand extends CommandBase {
     private final List<Point> pointsToVisit;
     private final boolean disableFastDrive;
     private int pointIndex = 0;
+    private boolean commandDidFinish = true;
+    private long lastLog;
 
     public PurePursuitCommand(List<Point> pointsToVisit) {
         this(
@@ -86,10 +90,28 @@ public class PurePursuitCommand extends CommandBase {
     }
 
     @Override
-    public void execute() {
-        Point targetPoint = pointsToVisit.get(pointIndex);
+    public void initialize() {
+        if (pointsToVisit == null || pointsToVisit.isEmpty()) {
+            return;
+        }
+        Point point = pointsToVisit.get(0);
 
-        if (targetPoint == null) {
+        final CommandScheduler commandScheduler = CommandScheduler.getInstance();
+        Command pointCommand = point.command();
+        if (pointCommand != null) {
+            commandScheduler.schedule(pointCommand);
+        }
+        commandDidFinish = !point.waitForCommand();
+        commandScheduler.onCommandFinish(this::finishCallback);
+    }
+
+    @Override
+    public void execute() {
+        Point targetPoint;
+
+        try {
+            targetPoint = pointsToVisit.get(pointIndex);
+        } catch (Exception e) {
             return;
         }
 
@@ -97,7 +119,13 @@ public class PurePursuitCommand extends CommandBase {
 
         ChassisSpeeds computedSpeed = computeSpeed(targetPose, targetPoint.motionBudget());
 
-        Log.i("PurePursuit", String.valueOf(computedSpeed));
+        if (System.nanoTime() - lastLog > 1e+9) {
+            Log.i("PurePursuit", String.valueOf(computedSpeed));
+            Log.i("PurePursuit", String.format("Current point: %d/%d", pointIndex, pointsToVisit.size() - 1));
+            final double distance = Math.abs(targetPoint.pose().getTranslation().getDistance(robotOdometry.getPose().getTranslation()));
+            Log.i("PurePursuit", String.format("Distance to target: %f", distance));
+            lastLog = System.nanoTime();
+        }
 
         robotDrive.drive(computedSpeed, true, new Rotation2d());
 
@@ -110,7 +138,13 @@ public class PurePursuitCommand extends CommandBase {
             return true;
         }
 
-        return (pointIndex == pointsToVisit.size() - 1) && xController.atSetPoint() && yController.atSetPoint() && rotationController.atSetPoint();
+        Pose2d robotPose = robotOdometry.getPose();
+
+        Pose2d targetPose = pointsToVisit.get(pointIndex).pose();
+
+        double distanceToTarget = robotPose.getTranslation().getDistance(targetPose.getTranslation());
+
+        return (pointIndex == pointsToVisit.size() - 1) && ((xController.atSetPoint() && yController.atSetPoint() && rotationController.atSetPoint()) || distanceToTarget < advancePointThreshold * 0.75);
     }
 
     private void displayOnField() {
@@ -140,22 +174,36 @@ public class PurePursuitCommand extends CommandBase {
 
         Pose2d targetPose = targetPoint.pose();
 
-        double distanceToTarget = robotPose.getTranslation().getDistance(targetPose.getTranslation());
 
-        if (Math.abs(distanceToTarget) < advancePointThreshold) {
-            Log.i("aaaaaaa", "distance is " + distanceToTarget + ", advancing");
+        final double distanceToTarget = Math.abs(robotPose.getTranslation().getDistance(targetPose.getTranslation()));
+
+        if (distanceToTarget < advancePointThreshold && commandDidFinish && pointIndex != pointsToVisit.size() - 1) {
+            Log.i("PurePursuit", String.format("Distance to target: %f < %f, advancing point...", distanceToTarget, advancePointThreshold));
             // Switch to the next point once in range
             pointIndex++;
 
             if (pointIndex >= pointsToVisit.size()) {
                 pointIndex = pointsToVisit.size() - 1;
+            } else {
+                try {
+                    Point nextPoint = pointsToVisit.get(pointIndex);
+                    Command commandToSchedule = nextPoint.command();
+                    if (commandToSchedule != null) {
+                        Log.i("PurePursuit", "Point has command, scheduling...");
+                        CommandScheduler.getInstance().schedule(commandToSchedule);
+                        commandDidFinish = !nextPoint.waitForCommand();
+                    } else {
+                        commandDidFinish = true;
+                    }
+                } catch (Exception ignored) {
+                }
             }
         }
 
         Translation2d targetTranslation = targetPose.getTranslation();
         Rotation2d targetRotation = targetPose.getRotation();
 
-        if (Math.abs(distanceToTarget) > lookAtTargetThreshold && !disableFastDrive) {
+        if (distanceToTarget > lookAtTargetThreshold && !disableFastDrive) {
             // Look at the target to go faster when we're further away
             targetRotation = new Rotation2d(RobotMath.getAngleToPoint(robotPose.getTranslation(), targetTranslation));
             rotationController.setContinuous(true);
@@ -198,5 +246,12 @@ public class PurePursuitCommand extends CommandBase {
         }
 
         return new ChassisSpeeds(xPower, yPower, rotPower);
+    }
+
+    public void finishCallback(Command command) {
+        Point point = pointsToVisit.get(pointIndex);
+        if (command == point.command()) {
+            commandDidFinish = true;
+        }
     }
 }
