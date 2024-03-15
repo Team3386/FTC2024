@@ -101,7 +101,8 @@ public class OdometrySubsystem extends SubsystemBase {
         final Pose2d drivePose = DriveSubsystem.getInstance().getPose();
 
         final double leftDelta = leftEncoder.getDistance() - prevLeftEncoder;
-        final double rightDelta = rightEncoder.getDistance() - prevRightEncoder;
+        // TODO: horrible hack fix later plz
+        final double rightDelta = -(rightEncoder.getDistance() - prevRightEncoder);
         final double centerDelta = centerEncoder.getDistance() - prevCenterEncoder;
 //        final Rotation2d currentRotation = prevRotation.plus(new Rotation2d((leftDelta - rightDelta) / OdometryConstants.TRACK_WIDTH));
         final double deltaRot = drivePose.getHeading() - prevRotation;
