@@ -50,15 +50,16 @@ public class VisionSubsystem extends SubsystemBase {
     public void init() {
         HardwareMap hardwareMap = GlobalSubsystem.getInstance().hardwareMap;
 
-        AprilTagProcessor frontAprilTag = new AprilTagProcessor.Builder().setNumThreads(1).setOutputUnits(DistanceUnit.CM, AngleUnit.RADIANS).build();
+        AprilTagProcessor frontAprilTag = new AprilTagProcessor.Builder().setNumThreads(1).build();
+        frontAprilTag.setPoseSolver(AprilTagProcessor.PoseSolver.OPENCV_ITERATIVE);
 
-        NcnnProcessor ncnnProcessor = new NcnnProcessor(
-                "models/nanodet_m-int8.param", "models/nanodet_m-int8.bin",
-                new int[]{320, 320}, new float[]{103.53f, 116.28f, 123.675f},
-                new float[]{1.f / 57.375f, 1.f / 57.12f, 1.f / 58.395f},
-                0.5f,
-                1
-        );
+//        NcnnProcessor ncnnProcessor = new NcnnProcessor(
+//                "models/nanodet_m-int8.param", "models/nanodet_m-int8.bin",
+//                new int[]{320, 320}, new float[]{103.53f, 116.28f, 123.675f},
+//                new float[]{1.f / 57.375f, 1.f / 57.12f, 1.f / 58.395f},
+//                0.5f,
+//                1
+//        );
 
         TfodProcessor tf = new TfodProcessor.Builder()
                 .setModelFileName("Prop.tflite")
@@ -152,8 +153,8 @@ public class VisionSubsystem extends SubsystemBase {
 
         TelemetryPacket packet = GlobalSubsystem.getInstance().fieldPacket;
 
-        Translation2d tagRelativeToCamera = new Translation2d(detection.ftcPose.x, detection.ftcPose.y);
-        Translation2d tagRelativeToRobot = tagRelativeToCamera.plus(VisionConstants.CAMERA_POSITION);
+        Translation2d tagRelativeToCamera = new Translation2d(detection.ftcPose.x, detection.ftcPose.y).times(Constants.CENTIMETER_PER_INCH);
+        Translation2d tagRelativeToRobot = tagRelativeToCamera.minus(VisionConstants.CAMERA_POSITION);
         Translation2d tagRelativeToRobotGlobal = tagRelativeToRobot.rotateBy(robotPose.getRotation().unaryMinus());
 
         packet.fieldOverlay().setTranslation(robotPose.getY(), -robotPose.getX()).setRotation(0);
@@ -164,7 +165,7 @@ public class VisionSubsystem extends SubsystemBase {
         packet.fieldOverlay().setTranslation(aprilTagPosition.getY(), -aprilTagPosition.getX()).setRotation(0);
         packet.fieldOverlay().strokeLine(0, 0, robotRelativeToTag.getY(), -robotRelativeToTag.getX());
 
-        if (Math.abs(robotRelativeToTag.getNorm()) > 80) {
+        if (Math.abs(robotRelativeToTag.getNorm()) > 100 || Math.abs(robotRelativeToTag.getNorm()) < 60) {
             return null;
         }
 

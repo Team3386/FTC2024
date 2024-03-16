@@ -22,7 +22,7 @@ public class Constants {
         public static double MOTION_BUDGET = 150;
 
         public static double[] ARM_ROTATION_PID = {1, 0, 0};
-        public static double[] ARM_WRIST_PID = {0.00625, 0, 0};
+        public static double[] ARM_WRIST_PID = {0.007, 0, 0};
         public static double[] ARM_EXTEND_PID = {0.2, 0, 0};
 
         public static double ARM_ROTATION_PASS = 25;
@@ -35,7 +35,9 @@ public class Constants {
 
         public static double ARM_WRIST_UP = -600;
         public static double ARM_WRIST_DOWN = 0;
-        public static double ARM_WRIST_PICKUP = -530;
+        public static double ARM_WRIST_PICKUP = -480;
+
+        public static double WRIST_LIMIT = 0.5;
 
         public static long WAIT_BEFORE_UP = 155;
     }
@@ -163,9 +165,15 @@ public class Constants {
 
             // Red big
             positionMap.put(7, new Translation2d(101, -179.5));
+            // Red small
+            positionMap.put(8, new Translation2d(90.5, -179.5));
+
 
             // Blue big
             positionMap.put(10, new Translation2d(-101, -179.5));
+            // Blue small
+            positionMap.put(9, new Translation2d(-90.5, -179.5));
+
 
             APRILTAG_POSITIONS = Collections.unmodifiableMap(positionMap);
         }

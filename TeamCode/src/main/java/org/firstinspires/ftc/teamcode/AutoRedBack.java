@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Constants.AutonomousConstants;
 import org.firstinspires.ftc.teamcode.commands.ToTargetCommand;
+import org.firstinspires.ftc.teamcode.commands.WristToTargetCommand;
 import org.firstinspires.ftc.teamcode.commands.purepursuit.Point;
 import org.firstinspires.ftc.teamcode.commands.purepursuit.PurePursuitCommand;
 
@@ -35,7 +36,7 @@ public class AutoRedBack extends Robot {
         wrist.setTolerance(10);
 
         CommandScheduler.getInstance().schedule(
-                new ToTargetCommand(wrist, -600, robotArm::getWrist, robotArm::setWristMotor).alongWith(new WaitCommand(2000)).andThen(
+                new WristToTargetCommand(wrist, AutonomousConstants.ARM_WRIST_UP, robotArm::getWrist, robotArm::setWristMotor).alongWith(new WaitCommand(2000)).andThen(
                         new InstantCommand(() -> {
                             robotVision.fixProp();
                             CommandScheduler.getInstance().schedule(generatePath(robotVision.propPos));
@@ -70,7 +71,7 @@ public class AutoRedBack extends Robot {
                                         extend, AutonomousConstants.ARM_EXTEND_PICKUP,
                                         robotArm::getExtend, robotArm::setExtendMotor
                                 ),
-                                new ToTargetCommand(
+                                new WristToTargetCommand(
                                         wrist, AutonomousConstants.ARM_WRIST_PICKUP,
                                         robotArm::getWrist, robotArm::setWristMotor
                                 )
@@ -98,7 +99,7 @@ public class AutoRedBack extends Robot {
                             )));
                             robotHand.setRightState(true);
                         }, robotHand).alongWith(
-                                new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new ToTargetCommand(
+                                new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new WristToTargetCommand(
                                         wrist, AutonomousConstants.ARM_WRIST_UP,
                                         robotArm::getWrist, robotArm::setWristMotor
                                 ))
@@ -111,7 +112,7 @@ public class AutoRedBack extends Robot {
                                 Rotation2d.fromDegrees(-90)
                         ),
                         75,
-                        new ToTargetCommand(
+                        new WristToTargetCommand(
                                 wrist, AutonomousConstants.ARM_WRIST_DOWN,
                                 robotArm::getWrist, robotArm::setWristMotor
                         ).alongWith(
@@ -134,7 +135,7 @@ public class AutoRedBack extends Robot {
                                         extend, AutonomousConstants.ARM_EXTEND_PICKUP,
                                         robotArm::getExtend, robotArm::setExtendMotor
                                 ),
-                                new ToTargetCommand(
+                                new WristToTargetCommand(
                                         wrist, AutonomousConstants.ARM_WRIST_PICKUP,
                                         robotArm::getWrist, robotArm::setWristMotor
                                 )
@@ -163,7 +164,7 @@ public class AutoRedBack extends Robot {
                             )));
                             robotHand.setRightState(true);
                         }, robotHand).alongWith(
-                                new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new ToTargetCommand(
+                                new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new WristToTargetCommand(
                                         wrist, AutonomousConstants.ARM_WRIST_UP,
                                         robotArm::getWrist, robotArm::setWristMotor
                                 ))
@@ -176,7 +177,7 @@ public class AutoRedBack extends Robot {
                                 Rotation2d.fromDegrees(-90)
                         ),
                         75,
-                        new ToTargetCommand(
+                        new WristToTargetCommand(
                                 wrist, AutonomousConstants.ARM_WRIST_DOWN,
                                 robotArm::getWrist, robotArm::setWristMotor
                         ).alongWith(
@@ -199,7 +200,7 @@ public class AutoRedBack extends Robot {
                                         extend, AutonomousConstants.ARM_EXTEND_PICKUP,
                                         robotArm::getExtend, robotArm::setExtendMotor
                                 ),
-                                new ToTargetCommand(
+                                new WristToTargetCommand(
                                         wrist, AutonomousConstants.ARM_WRIST_PICKUP,
                                         robotArm::getWrist, robotArm::setWristMotor
                                 )
@@ -229,7 +230,7 @@ public class AutoRedBack extends Robot {
                             robotHand.setRightState(true);
                         }, robotHand)
                                 .alongWith(
-                                        new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new ToTargetCommand(
+                                        new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new WristToTargetCommand(
                                                 wrist, AutonomousConstants.ARM_WRIST_UP,
                                                 robotArm::getWrist, robotArm::setWristMotor
                                         ))
@@ -243,7 +244,7 @@ public class AutoRedBack extends Robot {
                                 Rotation2d.fromDegrees(-90)
                         ),
                         75,
-                        new ToTargetCommand(
+                        new WristToTargetCommand(
                                 wrist, AutonomousConstants.ARM_WRIST_DOWN,
                                 robotArm::getWrist, robotArm::setWristMotor
                         ).alongWith(

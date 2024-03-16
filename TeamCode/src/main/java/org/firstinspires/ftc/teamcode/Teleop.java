@@ -19,16 +19,16 @@ public class Teleop extends Robot {
                     pilotController.getLeftX() * movementSlowdown * Constants.DriveConstants.MAX_MOVEMENT_PER_SECOND,
                     pilotController.getLeftY() * movementSlowdown * Constants.DriveConstants.MAX_MOVEMENT_PER_SECOND,
                     pilotController.getRightX() * movementSlowdown * Constants.DriveConstants.MAX_ROTATION_PER_SECOND
-            ), true, robotGlobal.driverRotation);
+            ), true, robotGlobal.driverRotation.unaryMinus());
 
             if (pilotController.wasJustPressed(GamepadKeys.Button.START)) {
-                robotDrive.resetPose(new Pose2d().rotate(-Math.PI * 1.5));
+                robotDrive.resetPose(new Pose2d().rotate(robotGlobal.driverRotation.getRadians()));
             }
         }, robotDrive));
 
         robotOdometry.setDefaultCommand(new RunCommand(() -> {
             if (pilotController.wasJustPressed(GamepadKeys.Button.START)) {
-                robotOdometry.resetPose(new Pose2d().rotate(-Math.PI * 1.5));
+                robotOdometry.resetPose(new Pose2d().rotate(robotGlobal.driverRotation.getRadians()));
             }
         }, robotOdometry));
 

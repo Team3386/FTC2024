@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Constants.AutonomousConstants;
 import org.firstinspires.ftc.teamcode.commands.ToTargetCommand;
+import org.firstinspires.ftc.teamcode.commands.WristToTargetCommand;
 import org.firstinspires.ftc.teamcode.commands.purepursuit.Point;
 import org.firstinspires.ftc.teamcode.commands.purepursuit.PurePursuitCommand;
 
@@ -35,7 +36,7 @@ public class AutoBlueBack extends Robot {
         wrist.setTolerance(10);
 
         CommandScheduler.getInstance().schedule(
-                new ToTargetCommand(wrist, -600, robotArm::getWrist, robotArm::setWristMotor).alongWith(new WaitCommand(2000)).andThen(
+                new WristToTargetCommand(wrist, AutonomousConstants.ARM_WRIST_UP, robotArm::getWrist, robotArm::setWristMotor).alongWith(new WaitCommand(2000)).andThen(
                         new InstantCommand(() -> {
                             robotVision.fixProp();
                             CommandScheduler.getInstance().schedule(generatePath(robotVision.propPos));
@@ -70,7 +71,7 @@ public class AutoBlueBack extends Robot {
                                         extend, AutonomousConstants.ARM_EXTEND_PICKUP,
                                         robotArm::getExtend, robotArm::setExtendMotor
                                 ),
-                                new ToTargetCommand(
+                                new WristToTargetCommand(
                                         wrist, AutonomousConstants.ARM_WRIST_UP,
                                         robotArm::getWrist, robotArm::setWristMotor
                                 )
@@ -79,14 +80,14 @@ public class AutoBlueBack extends Robot {
                 );
                 points.add(new Point(
                         new Pose2d(
-                                new Translation2d(-91.44, -97.5),
+                                new Translation2d(-91.44, -99),
                                 Rotation2d.fromDegrees(0)
                         ),
                         new WaitCommand(200), true
                 ));
                 points.add(new Point(
                         new Pose2d(
-                                new Translation2d(-91.44, -97.5),
+                                new Translation2d(-91.44, -99),
                                 Rotation2d.fromDegrees(0)
                         ),
                         new InstantCommand(() -> {
@@ -99,7 +100,7 @@ public class AutoBlueBack extends Robot {
                             )));
                             robotHand.setRightState(true);
                         }, robotHand).alongWith(
-                                new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new ToTargetCommand(
+                                new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new WristToTargetCommand(
                                         wrist, AutonomousConstants.ARM_WRIST_UP,
                                         robotArm::getWrist, robotArm::setWristMotor
                                 ))
@@ -113,7 +114,7 @@ public class AutoBlueBack extends Robot {
                                 Rotation2d.fromDegrees(90)
                         ),
                         75,
-                        new ToTargetCommand(
+                        new WristToTargetCommand(
                                 wrist, AutonomousConstants.ARM_WRIST_DOWN,
                                 robotArm::getWrist, robotArm::setWristMotor
                         ).alongWith(
@@ -136,7 +137,7 @@ public class AutoBlueBack extends Robot {
                                         extend, AutonomousConstants.ARM_EXTEND_PICKUP,
                                         robotArm::getExtend, robotArm::setExtendMotor
                                 ),
-                                new ToTargetCommand(
+                                new WristToTargetCommand(
                                         wrist, AutonomousConstants.ARM_WRIST_PICKUP,
                                         robotArm::getWrist, robotArm::setWristMotor
                                 )
@@ -145,14 +146,14 @@ public class AutoBlueBack extends Robot {
                 );
                 points.add(new Point(
                         new Pose2d(
-                                new Translation2d(-97.5, -91.44),
+                                new Translation2d(-99, -91.44),
                                 Rotation2d.fromDegrees(90)
                         ),
                         new WaitCommand(200), true
                 ));
                 points.add(new Point(
                         new Pose2d(
-                                new Translation2d(-97.5, -91.44),
+                                new Translation2d(-99, -91.44),
                                 Rotation2d.fromDegrees(90)
                         ),
                         new InstantCommand(() -> {
@@ -165,7 +166,7 @@ public class AutoBlueBack extends Robot {
                             )));
                             robotHand.setRightState(true);
                         }, robotHand).alongWith(
-                                new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new ToTargetCommand(
+                                new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new WristToTargetCommand(
                                         wrist, AutonomousConstants.ARM_WRIST_UP,
                                         robotArm::getWrist, robotArm::setWristMotor
                                 ))
@@ -178,7 +179,7 @@ public class AutoBlueBack extends Robot {
                                 Rotation2d.fromDegrees(90)
                         ),
                         75,
-                        new ToTargetCommand(
+                        new WristToTargetCommand(
                                 wrist, AutonomousConstants.ARM_WRIST_DOWN,
                                 robotArm::getWrist, robotArm::setWristMotor
                         ).alongWith(
@@ -201,7 +202,7 @@ public class AutoBlueBack extends Robot {
                                         extend, AutonomousConstants.ARM_EXTEND_PICKUP,
                                         robotArm::getExtend, robotArm::setExtendMotor
                                 ),
-                                new ToTargetCommand(
+                                new WristToTargetCommand(
                                         wrist, AutonomousConstants.ARM_WRIST_UP,
                                         robotArm::getWrist, robotArm::setWristMotor
                                 )
@@ -229,7 +230,7 @@ public class AutoBlueBack extends Robot {
                             )));
                             robotHand.setRightState(true);
                         }, robotHand).alongWith(
-                                new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new ToTargetCommand(
+                                new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new WristToTargetCommand(
                                         wrist, AutonomousConstants.ARM_WRIST_UP,
                                         robotArm::getWrist, robotArm::setWristMotor
                                 ))
@@ -242,7 +243,7 @@ public class AutoBlueBack extends Robot {
                                 Rotation2d.fromDegrees(90)
                         ),
                         75,
-                        new ToTargetCommand(
+                        new WristToTargetCommand(
                                 wrist, AutonomousConstants.ARM_WRIST_DOWN,
                                 robotArm::getWrist, robotArm::setWristMotor
                         ).alongWith(
