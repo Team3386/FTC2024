@@ -254,6 +254,8 @@ public class AutoRedFront extends Robot {
                 break;
         }
 
+        points.add(new Point(new Translation2d(152.4, 144.78)));
+
 //        switch (prop) {
 //            case 0:
 //                points.add(new Point(new Translation2d(-152.4, -152.4)));

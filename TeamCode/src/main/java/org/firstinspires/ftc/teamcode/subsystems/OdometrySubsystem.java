@@ -43,8 +43,6 @@ public class OdometrySubsystem extends SubsystemBase {
         leftEncoder.setDistancePerPulse(OdometryConstants.TICKS_TO_DISTANCE);
         rightEncoder.setDistancePerPulse(OdometryConstants.TICKS_TO_DISTANCE);
         centerEncoder.setDistancePerPulse(OdometryConstants.TICKS_TO_DISTANCE);
-
-        resetPose(new Pose2d());
     }
 
     public void resetPose(Pose2d newPose) {
