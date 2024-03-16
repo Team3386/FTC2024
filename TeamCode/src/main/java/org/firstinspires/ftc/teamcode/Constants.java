@@ -40,6 +40,7 @@ public class Constants {
         public static double WRIST_LIMIT = 0.5;
 
         public static long WAIT_BEFORE_UP = 155;
+        public static long WAIT_BEFORE_LOCK = 5000;
     }
 
     @Config

@@ -9,15 +9,12 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.Constants.VisionConstants;
 import org.firstinspires.ftc.teamcode.utils.CameraStreamProcessor;
 import org.firstinspires.ftc.teamcode.utils.TempProcessor;
 import org.firstinspires.ftc.teamcode.utils.ncnnprocessor.DetectedObject;
-import org.firstinspires.ftc.teamcode.utils.ncnnprocessor.NcnnProcessor;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -191,7 +188,7 @@ public class VisionSubsystem extends SubsystemBase {
         }   // end for() loop
     }
 
-    public void fixProp() {
+    public void lockProp() {
         fixProp = true;
     }
 }

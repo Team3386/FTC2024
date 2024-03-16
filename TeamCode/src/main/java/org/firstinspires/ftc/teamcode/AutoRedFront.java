@@ -36,9 +36,9 @@ public class AutoRedFront extends Robot {
         wrist.setTolerance(10);
 
         CommandScheduler.getInstance().schedule(
-                new WristToTargetCommand(wrist, AutonomousConstants.ARM_WRIST_UP, robotArm::getWrist, robotArm::setWristMotor).alongWith(new WaitCommand(2000)).andThen(
+                new WristToTargetCommand(wrist, AutonomousConstants.ARM_WRIST_UP, robotArm::getWrist, robotArm::setWristMotor).alongWith(new WaitCommand(AutonomousConstants.WAIT_BEFORE_LOCK)).andThen(
                         new InstantCommand(() -> {
-                            robotVision.fixProp();
+                            robotVision.lockProp();
                             CommandScheduler.getInstance().schedule(generatePath(robotVision.propPos));
                         })
                 )
