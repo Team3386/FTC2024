@@ -93,15 +93,17 @@ public class AutoRedFront extends Robot {
                             CommandScheduler.getInstance().schedule(new ToTargetCommand(
                                     rotation, AutonomousConstants.ARM_ROTATION_PASS,
                                     robotArm::getRotation, robotArm::setRotationMotor
-                            ));
+                            ).alongWith(new ToTargetCommand(
+                                    extend, AutonomousConstants.ARM_EXTEND_TOP,
+                                    robotArm::getExtend, robotArm::setExtendMotor
+                            )));
                             robotHand.setRightState(true);
-                        }, robotHand)
-                                .alongWith(
-                                        new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new ToTargetCommand(
-                                                wrist, AutonomousConstants.ARM_WRIST_UP,
-                                                robotArm::getWrist, robotArm::setWristMotor
-                                        ))
-                                ),
+                        }, robotHand).alongWith(
+                                new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new ToTargetCommand(
+                                        wrist, AutonomousConstants.ARM_WRIST_UP,
+                                        robotArm::getWrist, robotArm::setWristMotor
+                                ))
+                        ),
                         true)
                 );
                 points.add(new Point(new Translation2d(91.44, 76.2)));
@@ -112,14 +114,9 @@ public class AutoRedFront extends Robot {
                         ),
                         75,
                         new ToTargetCommand(
-                                extend, AutonomousConstants.ARM_EXTEND_TOP,
-
-                                robotArm::getExtend, robotArm::setExtendMotor
+                                wrist, AutonomousConstants.ARM_WRIST_DOWN,
+                                robotArm::getWrist, robotArm::setWristMotor
                         ).alongWith(
-                                new ToTargetCommand(
-                                        wrist, AutonomousConstants.ARM_WRIST_DOWN,
-                                        robotArm::getWrist, robotArm::setWristMotor
-                                ),
                                 new InstantCommand(() -> robotHand.setRightState(false), robotHand)
                         ),
                         false)
@@ -162,7 +159,10 @@ public class AutoRedFront extends Robot {
                             CommandScheduler.getInstance().schedule(new ToTargetCommand(
                                     rotation, AutonomousConstants.ARM_ROTATION_PASS,
                                     robotArm::getRotation, robotArm::setRotationMotor
-                            ));
+                            ).alongWith(new ToTargetCommand(
+                                    extend, AutonomousConstants.ARM_EXTEND_TOP,
+                                    robotArm::getExtend, robotArm::setExtendMotor
+                            )));
                             robotHand.setRightState(true);
                         }, robotHand).alongWith(
                                 new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new ToTargetCommand(
@@ -179,13 +179,9 @@ public class AutoRedFront extends Robot {
                         ),
                         75,
                         new ToTargetCommand(
-                                extend, AutonomousConstants.ARM_EXTEND_TOP,
-                                robotArm::getExtend, robotArm::setExtendMotor
+                                wrist, AutonomousConstants.ARM_WRIST_DOWN,
+                                robotArm::getWrist, robotArm::setWristMotor
                         ).alongWith(
-                                new ToTargetCommand(
-                                        wrist, AutonomousConstants.ARM_WRIST_DOWN,
-                                        robotArm::getWrist, robotArm::setWristMotor
-                                ),
                                 new InstantCommand(() -> robotHand.setRightState(false), robotHand)
                         ),
                         false)
@@ -227,7 +223,10 @@ public class AutoRedFront extends Robot {
                             CommandScheduler.getInstance().schedule(new ToTargetCommand(
                                     rotation, AutonomousConstants.ARM_ROTATION_PASS,
                                     robotArm::getRotation, robotArm::setRotationMotor
-                            ));
+                            ).alongWith(new ToTargetCommand(
+                                    extend, AutonomousConstants.ARM_EXTEND_TOP,
+                                    robotArm::getExtend, robotArm::setExtendMotor
+                            )));
                             robotHand.setRightState(true);
                         }, robotHand).alongWith(
                                 new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new ToTargetCommand(
@@ -244,13 +243,9 @@ public class AutoRedFront extends Robot {
                         ),
                         75,
                         new ToTargetCommand(
-                                extend, AutonomousConstants.ARM_EXTEND_TOP,
-                                robotArm::getExtend, robotArm::setExtendMotor
+                                wrist, AutonomousConstants.ARM_WRIST_DOWN,
+                                robotArm::getWrist, robotArm::setWristMotor
                         ).alongWith(
-                                new ToTargetCommand(
-                                        wrist, AutonomousConstants.ARM_WRIST_DOWN,
-                                        robotArm::getWrist, robotArm::setWristMotor
-                                ),
                                 new InstantCommand(() -> robotHand.setRightState(false), robotHand)
                         ),
                         false)

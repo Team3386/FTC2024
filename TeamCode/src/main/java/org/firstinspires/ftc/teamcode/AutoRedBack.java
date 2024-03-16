@@ -79,20 +79,23 @@ public class AutoRedBack extends Robot {
                 );
                 points.add(new Point(
                         new Pose2d(
-                                new Translation2d(115, -115),
+                                new Translation2d(115, -120),
                                 Rotation2d.fromDegrees(-90)
                         ))
                 );
                 points.add(new Point(
                         new Pose2d(
-                                new Translation2d(115, -115),
+                                new Translation2d(115, -120),
                                 Rotation2d.fromDegrees(-90)
                         ),
                         new InstantCommand(() -> {
                             CommandScheduler.getInstance().schedule(new ToTargetCommand(
                                     rotation, AutonomousConstants.ARM_ROTATION_PASS,
                                     robotArm::getRotation, robotArm::setRotationMotor
-                            ));
+                            ).alongWith(new ToTargetCommand(
+                                    extend, AutonomousConstants.ARM_EXTEND_TOP,
+                                    robotArm::getExtend, robotArm::setExtendMotor
+                            )));
                             robotHand.setRightState(true);
                         }, robotHand).alongWith(
                                 new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new ToTargetCommand(
@@ -109,13 +112,9 @@ public class AutoRedBack extends Robot {
                         ),
                         75,
                         new ToTargetCommand(
-                                extend, AutonomousConstants.ARM_EXTEND_TOP,
-                                robotArm::getExtend, robotArm::setExtendMotor
+                                wrist, AutonomousConstants.ARM_WRIST_DOWN,
+                                robotArm::getWrist, robotArm::setWristMotor
                         ).alongWith(
-                                new ToTargetCommand(
-                                        wrist, AutonomousConstants.ARM_WRIST_DOWN,
-                                        robotArm::getWrist, robotArm::setWristMotor
-                                ),
                                 new InstantCommand(() -> robotHand.setRightState(false), robotHand)
                         ),
                         false)
@@ -144,21 +143,24 @@ public class AutoRedBack extends Robot {
                 );
                 points.add(new Point(
                         new Pose2d(
-                                new Translation2d(96, -91.44),
+                                new Translation2d(102, -91.44),
                                 Rotation2d.fromDegrees(-90)
                         ),
                         new WaitCommand(200), true
                 ));
                 points.add(new Point(
                         new Pose2d(
-                                new Translation2d(96, -91.44),
+                                new Translation2d(102, -91.44),
                                 Rotation2d.fromDegrees(-90)
                         ),
                         new InstantCommand(() -> {
                             CommandScheduler.getInstance().schedule(new ToTargetCommand(
                                     rotation, AutonomousConstants.ARM_ROTATION_PASS,
                                     robotArm::getRotation, robotArm::setRotationMotor
-                            ));
+                            ).alongWith(new ToTargetCommand(
+                                    extend, AutonomousConstants.ARM_EXTEND_TOP,
+                                    robotArm::getExtend, robotArm::setExtendMotor
+                            )));
                             robotHand.setRightState(true);
                         }, robotHand).alongWith(
                                 new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new ToTargetCommand(
@@ -175,13 +177,9 @@ public class AutoRedBack extends Robot {
                         ),
                         75,
                         new ToTargetCommand(
-                                extend, AutonomousConstants.ARM_EXTEND_TOP,
-                                robotArm::getExtend, robotArm::setExtendMotor
+                                wrist, AutonomousConstants.ARM_WRIST_DOWN,
+                                robotArm::getWrist, robotArm::setWristMotor
                         ).alongWith(
-                                new ToTargetCommand(
-                                        wrist, AutonomousConstants.ARM_WRIST_DOWN,
-                                        robotArm::getWrist, robotArm::setWristMotor
-                                ),
                                 new InstantCommand(() -> robotHand.setRightState(false), robotHand)
                         ),
                         false)
@@ -190,7 +188,7 @@ public class AutoRedBack extends Robot {
             case 2:
                 points.add(new Point(
                         new Pose2d(
-                                new Translation2d(91.44, -121.92),
+                                new Translation2d(86, -121.92),
                                 Rotation2d.fromDegrees(0)
                         ),
                         new ToTargetCommand(
@@ -210,21 +208,24 @@ public class AutoRedBack extends Robot {
                 );
                 points.add(new Point(
                         new Pose2d(
-                                new Translation2d(91.44, -98.5),
+                                new Translation2d(86, -100),
                                 Rotation2d.fromDegrees(0)
                         ),
                         new WaitCommand(200), true
                 ));
                 points.add(new Point(
                         new Pose2d(
-                                new Translation2d(91.44, -98.5),
+                                new Translation2d(86, -100),
                                 Rotation2d.fromDegrees(0)
                         ),
                         new InstantCommand(() -> {
                             CommandScheduler.getInstance().schedule(new ToTargetCommand(
                                     rotation, AutonomousConstants.ARM_ROTATION_PASS,
                                     robotArm::getRotation, robotArm::setRotationMotor
-                            ));
+                            ).alongWith(new ToTargetCommand(
+                                    extend, AutonomousConstants.ARM_EXTEND_TOP,
+                                    robotArm::getExtend, robotArm::setExtendMotor
+                            )));
                             robotHand.setRightState(true);
                         }, robotHand)
                                 .alongWith(
@@ -235,7 +236,7 @@ public class AutoRedBack extends Robot {
                                 ),
                         true)
                 );
-                points.add(new Point(new Translation2d(91.44, -121.92)));
+                points.add(new Point(new Translation2d(86, -121.92)));
                 points.add(new Point(
                         new Pose2d(
                                 new Translation2d(152.4, -91.44),
@@ -243,13 +244,9 @@ public class AutoRedBack extends Robot {
                         ),
                         75,
                         new ToTargetCommand(
-                                extend, AutonomousConstants.ARM_EXTEND_TOP,
-                                robotArm::getExtend, robotArm::setExtendMotor
+                                wrist, AutonomousConstants.ARM_WRIST_DOWN,
+                                robotArm::getWrist, robotArm::setWristMotor
                         ).alongWith(
-                                new ToTargetCommand(
-                                        wrist, AutonomousConstants.ARM_WRIST_DOWN,
-                                        robotArm::getWrist, robotArm::setWristMotor
-                                ),
                                 new InstantCommand(() -> robotHand.setRightState(false), robotHand)
                         ),
                         false)

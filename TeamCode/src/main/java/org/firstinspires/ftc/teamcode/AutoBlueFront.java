@@ -92,7 +92,10 @@ public class AutoBlueFront extends Robot {
                             CommandScheduler.getInstance().schedule(new ToTargetCommand(
                                     rotation, AutonomousConstants.ARM_ROTATION_PASS,
                                     robotArm::getRotation, robotArm::setRotationMotor
-                            ));
+                            ).alongWith(new ToTargetCommand(
+                                    extend, AutonomousConstants.ARM_EXTEND_TOP,
+                                    robotArm::getExtend, robotArm::setExtendMotor
+                            )));
                             robotHand.setRightState(true);
                         }, robotHand).alongWith(
                                 new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new ToTargetCommand(
@@ -109,13 +112,9 @@ public class AutoBlueFront extends Robot {
                         ),
                         75,
                         new ToTargetCommand(
-                                extend, AutonomousConstants.ARM_EXTEND_TOP,
-                                robotArm::getExtend, robotArm::setExtendMotor
+                                wrist, AutonomousConstants.ARM_WRIST_DOWN,
+                                robotArm::getWrist, robotArm::setWristMotor
                         ).alongWith(
-                                new ToTargetCommand(
-                                        wrist, AutonomousConstants.ARM_WRIST_DOWN,
-                                        robotArm::getWrist, robotArm::setWristMotor
-                                ),
                                 new InstantCommand(() -> robotHand.setRightState(false), robotHand)
                         ),
                         false)
@@ -158,7 +157,10 @@ public class AutoBlueFront extends Robot {
                             CommandScheduler.getInstance().schedule(new ToTargetCommand(
                                     rotation, AutonomousConstants.ARM_ROTATION_PASS,
                                     robotArm::getRotation, robotArm::setRotationMotor
-                            ));
+                            ).alongWith(new ToTargetCommand(
+                                    extend, AutonomousConstants.ARM_EXTEND_TOP,
+                                    robotArm::getExtend, robotArm::setExtendMotor
+                            )));
                             robotHand.setRightState(true);
                         }, robotHand).alongWith(
                                 new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new ToTargetCommand(
@@ -175,13 +177,9 @@ public class AutoBlueFront extends Robot {
                         ),
                         75,
                         new ToTargetCommand(
-                                extend, AutonomousConstants.ARM_EXTEND_TOP,
-                                robotArm::getExtend, robotArm::setExtendMotor
+                                wrist, AutonomousConstants.ARM_WRIST_DOWN,
+                                robotArm::getWrist, robotArm::setWristMotor
                         ).alongWith(
-                                new ToTargetCommand(
-                                        wrist, AutonomousConstants.ARM_WRIST_DOWN,
-                                        robotArm::getWrist, robotArm::setWristMotor
-                                ),
                                 new InstantCommand(() -> robotHand.setRightState(false), robotHand)
                         ),
                         false)
@@ -224,7 +222,10 @@ public class AutoBlueFront extends Robot {
                             CommandScheduler.getInstance().schedule(new ToTargetCommand(
                                     rotation, AutonomousConstants.ARM_ROTATION_PASS,
                                     robotArm::getRotation, robotArm::setRotationMotor
-                            ));
+                            ).alongWith(new ToTargetCommand(
+                                    extend, AutonomousConstants.ARM_EXTEND_TOP,
+                                    robotArm::getExtend, robotArm::setExtendMotor
+                            )));
                             robotHand.setRightState(true);
                         }, robotHand)
                                 .alongWith(
@@ -243,14 +244,9 @@ public class AutoBlueFront extends Robot {
                         ),
                         75,
                         new ToTargetCommand(
-                                extend, AutonomousConstants.ARM_EXTEND_TOP,
-
-                                robotArm::getExtend, robotArm::setExtendMotor
+                                wrist, AutonomousConstants.ARM_WRIST_DOWN,
+                                robotArm::getWrist, robotArm::setWristMotor
                         ).alongWith(
-                                new ToTargetCommand(
-                                        wrist, AutonomousConstants.ARM_WRIST_DOWN,
-                                        robotArm::getWrist, robotArm::setWristMotor
-                                ),
                                 new InstantCommand(() -> robotHand.setRightState(false), robotHand)
                         ),
                         false)

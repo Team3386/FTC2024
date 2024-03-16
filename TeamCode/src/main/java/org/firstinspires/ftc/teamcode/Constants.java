@@ -22,7 +22,7 @@ public class Constants {
         public static double MOTION_BUDGET = 150;
 
         public static double[] ARM_ROTATION_PID = {1, 0, 0};
-        public static double[] ARM_WRIST_PID = {0.006, 0, 0};
+        public static double[] ARM_WRIST_PID = {0.00625, 0, 0};
         public static double[] ARM_EXTEND_PID = {0.2, 0, 0};
 
         public static double ARM_ROTATION_PASS = 25;
@@ -31,7 +31,7 @@ public class Constants {
 
         public static double ARM_EXTEND_TOP = 210;
         public static double ARM_EXTEND_BOTTOM = 132;
-        public static double ARM_EXTEND_PICKUP = 170;
+        public static double ARM_EXTEND_PICKUP = 160;
 
         public static double ARM_WRIST_UP = -600;
         public static double ARM_WRIST_DOWN = 0;
