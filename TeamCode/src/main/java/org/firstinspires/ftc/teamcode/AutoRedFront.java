@@ -18,13 +18,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Autonomous
-public class AutoBlueBack extends Robot {
+public class AutoRedFront extends Robot {
     @Override
     public void init() {
         super.init();
-        robotDrive.resetPose(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
-        robotOdometry.resetPose(new Pose2d(new Translation2d(-182.88 + (45f / 2f), -91.44), Rotation2d.fromDegrees(90)));
-        robotGlobal.driverRotation = Rotation2d.fromDegrees(90);
+        robotDrive.resetPose(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(-90)));
+        robotOdometry.resetPose(new Pose2d(new Translation2d(182.88 - (45f / 2f), 30.48), Rotation2d.fromDegrees(-90)));
+        robotGlobal.driverRotation = Rotation2d.fromDegrees(-90);
         robotVision.propPos = 0;
     }
 
@@ -59,8 +59,8 @@ public class AutoBlueBack extends Robot {
             case 0:
                 points.add(new Point(
                         new Pose2d(
-                                new Translation2d(-91.44, -121.92),
-                                Rotation2d.fromDegrees(0)
+                                new Translation2d(91.44, 60.96),
+                                Rotation2d.fromDegrees(180)
                         ),
                         new ToTargetCommand(
                                 rotation, AutonomousConstants.ARM_ROTATION_PICKUP,
@@ -71,7 +71,7 @@ public class AutoBlueBack extends Robot {
                                         robotArm::getExtend, robotArm::setExtendMotor
                                 ),
                                 new ToTargetCommand(
-                                        wrist, AutonomousConstants.ARM_WRIST_UP,
+                                        wrist, AutonomousConstants.ARM_WRIST_PICKUP,
                                         robotArm::getWrist, robotArm::setWristMotor
                                 )
                         ),
@@ -79,15 +79,15 @@ public class AutoBlueBack extends Robot {
                 );
                 points.add(new Point(
                         new Pose2d(
-                                new Translation2d(-91.44, -97.5),
-                                Rotation2d.fromDegrees(0)
+                                new Translation2d(91.44, 35),
+                                Rotation2d.fromDegrees(180)
                         ),
                         new WaitCommand(200), true
                 ));
                 points.add(new Point(
                         new Pose2d(
-                                new Translation2d(-91.44, -97.5),
-                                Rotation2d.fromDegrees(0)
+                                new Translation2d(91.44, 35),
+                                Rotation2d.fromDegrees(180)
                         ),
                         new InstantCommand(() -> {
                             CommandScheduler.getInstance().schedule(new ToTargetCommand(
@@ -104,15 +104,16 @@ public class AutoBlueBack extends Robot {
                                 ),
                         true)
                 );
-                points.add(new Point(new Translation2d(-91.44, -121.92)));
+                points.add(new Point(new Translation2d(91.44, 76.2)));
                 points.add(new Point(
                         new Pose2d(
-                                new Translation2d(-152.4, -91.44),
-                                Rotation2d.fromDegrees(90)
+                                new Translation2d(152.4, 30.48),
+                                Rotation2d.fromDegrees(-90)
                         ),
                         75,
                         new ToTargetCommand(
                                 extend, AutonomousConstants.ARM_EXTEND_TOP,
+
                                 robotArm::getExtend, robotArm::setExtendMotor
                         ).alongWith(
                                 new ToTargetCommand(
@@ -127,8 +128,8 @@ public class AutoBlueBack extends Robot {
             case 1:
                 points.add(new Point(
                         new Pose2d(
-                                new Translation2d(-152.4, -91.44),
-                                Rotation2d.fromDegrees(90)
+                                new Translation2d(152.4, 30.48),
+                                Rotation2d.fromDegrees(-90)
                         ),
                         new ToTargetCommand(
                                 rotation, AutonomousConstants.ARM_ROTATION_PICKUP,
@@ -147,15 +148,15 @@ public class AutoBlueBack extends Robot {
                 );
                 points.add(new Point(
                         new Pose2d(
-                                new Translation2d(-97.5, -91.44),
-                                Rotation2d.fromDegrees(90)
+                                new Translation2d(97.5, 30.48),
+                                Rotation2d.fromDegrees(-90)
                         ),
                         new WaitCommand(200), true
                 ));
                 points.add(new Point(
                         new Pose2d(
-                                new Translation2d(-97.5, -91.44),
-                                Rotation2d.fromDegrees(90)
+                                new Translation2d(97.5, 30.48),
+                                Rotation2d.fromDegrees(-90)
                         ),
                         new InstantCommand(() -> {
                             CommandScheduler.getInstance().schedule(new ToTargetCommand(
@@ -165,7 +166,7 @@ public class AutoBlueBack extends Robot {
                             robotHand.setRightState(true);
                         }, robotHand).alongWith(
                                 new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new ToTargetCommand(
-                                        wrist, AutonomousConstants.ARM_WRIST_PICKUP,
+                                        wrist, AutonomousConstants.ARM_WRIST_UP,
                                         robotArm::getWrist, robotArm::setWristMotor
                                 ))
                         ),
@@ -173,8 +174,8 @@ public class AutoBlueBack extends Robot {
                 );
                 points.add(new Point(
                         new Pose2d(
-                                new Translation2d(-152.4, -91.44),
-                                Rotation2d.fromDegrees(90)
+                                new Translation2d(152.4, 30.48),
+                                Rotation2d.fromDegrees(-90)
                         ),
                         75,
                         new ToTargetCommand(
@@ -193,8 +194,8 @@ public class AutoBlueBack extends Robot {
             case 2:
                 points.add(new Point(
                         new Pose2d(
-                                new Translation2d(-152.4, -112.5),
-                                Rotation2d.fromDegrees(90)
+                                new Translation2d(152.4, 60.96),
+                                Rotation2d.fromDegrees(-90)
                         ),
                         new ToTargetCommand(
                                 rotation, AutonomousConstants.ARM_ROTATION_PICKUP,
@@ -205,7 +206,7 @@ public class AutoBlueBack extends Robot {
                                         robotArm::getExtend, robotArm::setExtendMotor
                                 ),
                                 new ToTargetCommand(
-                                        wrist, AutonomousConstants.ARM_WRIST_UP,
+                                        wrist, AutonomousConstants.ARM_WRIST_PICKUP,
                                         robotArm::getWrist, robotArm::setWristMotor
                                 )
                         ),
@@ -213,14 +214,14 @@ public class AutoBlueBack extends Robot {
                 );
                 points.add(new Point(
                         new Pose2d(
-                                new Translation2d(-115, -115),
-                                Rotation2d.fromDegrees(90)
+                                new Translation2d(115, 60.96),
+                                Rotation2d.fromDegrees(-90)
                         ))
                 );
                 points.add(new Point(
                         new Pose2d(
-                                new Translation2d(-115, -115),
-                                Rotation2d.fromDegrees(90)
+                                new Translation2d(115, 60.96),
+                                Rotation2d.fromDegrees(-90)
                         ),
                         new InstantCommand(() -> {
                             CommandScheduler.getInstance().schedule(new ToTargetCommand(
@@ -230,7 +231,7 @@ public class AutoBlueBack extends Robot {
                             robotHand.setRightState(true);
                         }, robotHand).alongWith(
                                 new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new ToTargetCommand(
-                                        wrist, AutonomousConstants.ARM_WRIST_PICKUP,
+                                        wrist, AutonomousConstants.ARM_WRIST_UP,
                                         robotArm::getWrist, robotArm::setWristMotor
                                 ))
                         ),
@@ -238,8 +239,8 @@ public class AutoBlueBack extends Robot {
                 );
                 points.add(new Point(
                         new Pose2d(
-                                new Translation2d(-152.4, -91.44),
-                                Rotation2d.fromDegrees(90)
+                                new Translation2d(152.4, 30.48),
+                                Rotation2d.fromDegrees(-90)
                         ),
                         75,
                         new ToTargetCommand(

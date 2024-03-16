@@ -31,15 +31,13 @@ import java.util.Optional;
 public class VisionSubsystem extends SubsystemBase {
     private static final VisionSubsystem INSTANCE = new VisionSubsystem();
     private final List<DetectedObject> ncnnResults = new ArrayList<>();
+    public int propPos = 0;
     private VisionPortal frontWebcam;
     private TempProcessor processors;
-
     private CameraStreamProcessor stream;
     private List<AprilTagDetection> aprilTagResults = new ArrayList<>();
     private List<Recognition> tfResults = new ArrayList<>();
     private Translation2d visionEstimatedPosition = new Translation2d();
-
-    private int propPos = 0;
     private boolean fixProp;
 
     private VisionSubsystem() {
@@ -194,9 +192,5 @@ public class VisionSubsystem extends SubsystemBase {
 
     public void fixProp() {
         fixProp = true;
-    }
-
-    public int propPos() {
-        return propPos;
     }
 }

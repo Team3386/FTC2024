@@ -25,6 +25,7 @@ public class AutoRedBack extends Robot {
         robotDrive.resetPose(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(-90)));
         robotOdometry.resetPose(new Pose2d(new Translation2d(182.88 - (45f / 2f), -91.44), Rotation2d.fromDegrees(-90)));
         robotGlobal.driverRotation = Rotation2d.fromDegrees(-90);
+        robotVision.propPos = 2;
     }
 
     @Override
@@ -37,7 +38,7 @@ public class AutoRedBack extends Robot {
                 new ToTargetCommand(wrist, -600, robotArm::getWrist, robotArm::setWristMotor).alongWith(new WaitCommand(2000)).andThen(
                         new InstantCommand(() -> {
                             robotVision.fixProp();
-                            CommandScheduler.getInstance().schedule(generatePath(robotVision.propPos()));
+                            CommandScheduler.getInstance().schedule(generatePath(robotVision.propPos));
                         })
                 )
         );
@@ -70,7 +71,7 @@ public class AutoRedBack extends Robot {
                                         robotArm::getExtend, robotArm::setExtendMotor
                                 ),
                                 new ToTargetCommand(
-                                        wrist, -500,
+                                        wrist, AutonomousConstants.ARM_WRIST_PICKUP,
                                         robotArm::getWrist, robotArm::setWristMotor
                                 )
                         ),
@@ -94,11 +95,10 @@ public class AutoRedBack extends Robot {
                             ));
                             robotHand.setRightState(true);
                         }, robotHand).alongWith(
-                                new WaitCommand(100).andThen(new ToTargetCommand(
-                                        wrist, -700,
+                                new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new ToTargetCommand(
+                                        wrist, AutonomousConstants.ARM_WRIST_UP,
                                         robotArm::getWrist, robotArm::setWristMotor
-                                )),
-                                new WaitCommand(200)
+                                ))
                         ),
                         true)
                 );
@@ -113,7 +113,7 @@ public class AutoRedBack extends Robot {
                                 robotArm::getExtend, robotArm::setExtendMotor
                         ).alongWith(
                                 new ToTargetCommand(
-                                        wrist, 0,
+                                        wrist, AutonomousConstants.ARM_WRIST_DOWN,
                                         robotArm::getWrist, robotArm::setWristMotor
                                 ),
                                 new InstantCommand(() -> robotHand.setRightState(false), robotHand)
@@ -136,7 +136,7 @@ public class AutoRedBack extends Robot {
                                         robotArm::getExtend, robotArm::setExtendMotor
                                 ),
                                 new ToTargetCommand(
-                                        wrist, -500,
+                                        wrist, AutonomousConstants.ARM_WRIST_PICKUP,
                                         robotArm::getWrist, robotArm::setWristMotor
                                 )
                         ),
@@ -161,11 +161,10 @@ public class AutoRedBack extends Robot {
                             ));
                             robotHand.setRightState(true);
                         }, robotHand).alongWith(
-                                new WaitCommand(100).andThen(new ToTargetCommand(
-                                        wrist, -700,
+                                new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new ToTargetCommand(
+                                        wrist, AutonomousConstants.ARM_WRIST_UP,
                                         robotArm::getWrist, robotArm::setWristMotor
-                                )),
-                                new WaitCommand(200)
+                                ))
                         ),
                         true)
                 );
@@ -180,7 +179,7 @@ public class AutoRedBack extends Robot {
                                 robotArm::getExtend, robotArm::setExtendMotor
                         ).alongWith(
                                 new ToTargetCommand(
-                                        wrist, 0,
+                                        wrist, AutonomousConstants.ARM_WRIST_DOWN,
                                         robotArm::getWrist, robotArm::setWristMotor
                                 ),
                                 new InstantCommand(() -> robotHand.setRightState(false), robotHand)
@@ -203,7 +202,7 @@ public class AutoRedBack extends Robot {
                                         robotArm::getExtend, robotArm::setExtendMotor
                                 ),
                                 new ToTargetCommand(
-                                        wrist, -500,
+                                        wrist, AutonomousConstants.ARM_WRIST_PICKUP,
                                         robotArm::getWrist, robotArm::setWristMotor
                                 )
                         ),
@@ -229,11 +228,10 @@ public class AutoRedBack extends Robot {
                             robotHand.setRightState(true);
                         }, robotHand)
                                 .alongWith(
-                                        new WaitCommand(100).andThen(new ToTargetCommand(
-                                                wrist, -700,
+                                        new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new ToTargetCommand(
+                                                wrist, AutonomousConstants.ARM_WRIST_UP,
                                                 robotArm::getWrist, robotArm::setWristMotor
-                                        )),
-                                        new WaitCommand(200)
+                                        ))
                                 ),
                         true)
                 );
@@ -249,7 +247,7 @@ public class AutoRedBack extends Robot {
                                 robotArm::getExtend, robotArm::setExtendMotor
                         ).alongWith(
                                 new ToTargetCommand(
-                                        wrist, 0,
+                                        wrist, AutonomousConstants.ARM_WRIST_DOWN,
                                         robotArm::getWrist, robotArm::setWristMotor
                                 ),
                                 new InstantCommand(() -> robotHand.setRightState(false), robotHand)

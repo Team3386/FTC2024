@@ -62,7 +62,7 @@ public class HandSubsystem extends SubsystemBase {
         if (leftState) {
             leftServo.setPosition(HandConstants.LEFT_OPEN_POSITION);
         } else {
-            leftServo.setPosition(0.45);
+            leftServo.setPosition(0.55);
         }
 
         if (rightState) {
