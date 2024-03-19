@@ -254,7 +254,8 @@ public class AutoRedFront extends Robot {
                 break;
         }
 
-        points.add(new Point(new Translation2d(152.4, 144.78)));
+        points.add(new Point(new Translation2d(152.4, 152.4)));
+        points.add(new Point(new Translation2d(152.4, 152.4), new WaitCommand(500).andThen(new InstantCommand(() -> robotHand.setLeftState(true), robotHand)), false));
 
 //        switch (prop) {
 //            case 0:

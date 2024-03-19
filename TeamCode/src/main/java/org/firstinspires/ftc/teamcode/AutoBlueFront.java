@@ -90,19 +90,25 @@ public class AutoBlueFront extends Robot {
                                 Rotation2d.fromDegrees(90)
                         ),
                         new InstantCommand(() -> {
-                            CommandScheduler.getInstance().schedule(new ToTargetCommand(
-                                    rotation, AutonomousConstants.ARM_ROTATION_PASS,
-                                    robotArm::getRotation, robotArm::setRotationMotor
-                            ).alongWith(new ToTargetCommand(
-                                    extend, AutonomousConstants.ARM_EXTEND_TOP,
-                                    robotArm::getExtend, robotArm::setExtendMotor
-                            )));
                             robotHand.setRightState(true);
                         }, robotHand).alongWith(
-                                new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new WristToTargetCommand(
-                                        wrist, AutonomousConstants.ARM_WRIST_UP,
-                                        robotArm::getWrist, robotArm::setWristMotor
-                                ))
+                                new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(
+                                        new WristToTargetCommand(
+                                                wrist, AutonomousConstants.ARM_WRIST_UP,
+                                                robotArm::getWrist, robotArm::setWristMotor),
+                                        new InstantCommand(() ->
+                                                CommandScheduler.getInstance().schedule(
+                                                        new ToTargetCommand(
+                                                                rotation, AutonomousConstants.ARM_ROTATION_PASS,
+                                                                robotArm::getRotation, robotArm::setRotationMotor
+                                                        ),
+                                                        new ToTargetCommand(
+                                                                extend, AutonomousConstants.ARM_EXTEND_TOP,
+                                                                robotArm::getExtend, robotArm::setExtendMotor
+                                                        )
+                                                )
+                                        )
+                                )
                         ),
                         true)
                 );
@@ -144,30 +150,36 @@ public class AutoBlueFront extends Robot {
                 );
                 points.add(new Point(
                         new Pose2d(
-                                new Translation2d(-97.5, 30.48),
+                                new Translation2d(-98.25, 30.48),
                                 Rotation2d.fromDegrees(90)
                         ),
                         new WaitCommand(200), true
                 ));
                 points.add(new Point(
                         new Pose2d(
-                                new Translation2d(-97.5, 30.48),
+                                new Translation2d(-98.25, 30.48),
                                 Rotation2d.fromDegrees(90)
                         ),
                         new InstantCommand(() -> {
-                            CommandScheduler.getInstance().schedule(new ToTargetCommand(
-                                    rotation, AutonomousConstants.ARM_ROTATION_PASS,
-                                    robotArm::getRotation, robotArm::setRotationMotor
-                            ).alongWith(new ToTargetCommand(
-                                    extend, AutonomousConstants.ARM_EXTEND_TOP,
-                                    robotArm::getExtend, robotArm::setExtendMotor
-                            )));
                             robotHand.setRightState(true);
                         }, robotHand).alongWith(
-                                new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new WristToTargetCommand(
-                                        wrist, AutonomousConstants.ARM_WRIST_UP,
-                                        robotArm::getWrist, robotArm::setWristMotor
-                                ))
+                                new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(
+                                        new WristToTargetCommand(
+                                                wrist, AutonomousConstants.ARM_WRIST_UP,
+                                                robotArm::getWrist, robotArm::setWristMotor),
+                                        new InstantCommand(() ->
+                                                CommandScheduler.getInstance().schedule(
+                                                        new ToTargetCommand(
+                                                                rotation, AutonomousConstants.ARM_ROTATION_PASS,
+                                                                robotArm::getRotation, robotArm::setRotationMotor
+                                                        ),
+                                                        new ToTargetCommand(
+                                                                extend, AutonomousConstants.ARM_EXTEND_TOP,
+                                                                robotArm::getExtend, robotArm::setExtendMotor
+                                                        )
+                                                )
+                                        )
+                                )
                         ),
                         true)
                 );
@@ -220,21 +232,26 @@ public class AutoBlueFront extends Robot {
                                 Rotation2d.fromDegrees(180)
                         ),
                         new InstantCommand(() -> {
-                            CommandScheduler.getInstance().schedule(new ToTargetCommand(
-                                    rotation, AutonomousConstants.ARM_ROTATION_PASS,
-                                    robotArm::getRotation, robotArm::setRotationMotor
-                            ).alongWith(new ToTargetCommand(
-                                    extend, AutonomousConstants.ARM_EXTEND_TOP,
-                                    robotArm::getExtend, robotArm::setExtendMotor
-                            )));
                             robotHand.setRightState(true);
-                        }, robotHand)
-                                .alongWith(
-                                        new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(new WristToTargetCommand(
+                        }, robotHand).alongWith(
+                                new WaitCommand(AutonomousConstants.WAIT_BEFORE_UP).andThen(
+                                        new WristToTargetCommand(
                                                 wrist, AutonomousConstants.ARM_WRIST_UP,
-                                                robotArm::getWrist, robotArm::setWristMotor
-                                        ))
-                                ),
+                                                robotArm::getWrist, robotArm::setWristMotor),
+                                        new InstantCommand(() ->
+                                                CommandScheduler.getInstance().schedule(
+                                                        new ToTargetCommand(
+                                                                rotation, AutonomousConstants.ARM_ROTATION_PASS,
+                                                                robotArm::getRotation, robotArm::setRotationMotor
+                                                        ),
+                                                        new ToTargetCommand(
+                                                                extend, AutonomousConstants.ARM_EXTEND_TOP,
+                                                                robotArm::getExtend, robotArm::setExtendMotor
+                                                        )
+                                                )
+                                        )
+                                )
+                        ),
                         true)
                 );
                 points.add(new Point(new Translation2d(-91.44, 76.2)));
@@ -254,6 +271,9 @@ public class AutoBlueFront extends Robot {
                 );
                 break;
         }
+
+        points.add(new Point(new Translation2d(-152.4, 152.4)));
+        points.add(new Point(new Translation2d(-152.4, 152.4), new WaitCommand(500).andThen(new InstantCommand(() -> robotHand.setLeftState(true), robotHand)), false));
 
 //        switch (prop) {
 //            case 0:
