@@ -14,33 +14,40 @@ import java.util.Map;
 public class Constants {
     public static double CENTIMETER_PER_INCH = 2.54;
     public static double CENTIMETER_PER_INCH_INVERSE = 1 / CENTIMETER_PER_INCH;
+    public static double PI_2 = Math.PI / 2;
 
     @Config
     public static class AutonomousConstants {
-        public static double[] POSITION_PID = {5, 0, 0};
+        public static double[] X_PID = {5, 0, 0};
+        public static double[] Y_PID = {5, 0, 0};
         public static double[] ROTATION_PID = {150, 0, 0};
+        public static double[] APRILTAG_PID = {85, 0, 0};
+        public static double APRILTAG_SPEED_LIMIT = 50;
         public static double MOTION_BUDGET = 150;
 
         public static double[] ARM_ROTATION_PID = {1, 0, 0};
-        public static double[] ARM_WRIST_PID = {0.007, 0, 0};
+        public static double[] ARM_WRIST_PID = {0.0075, 0, 0};
         public static double[] ARM_EXTEND_PID = {0.2, 0, 0};
 
-        public static double ARM_ROTATION_PASS = 25;
-        public static double ARM_ROTATION_BACKBOARD = 40;
+        public static double ARM_ROTATION_PASS = 20;
+        public static double ARM_ROTATION_BACKBOARD = 25;
         public static double ARM_ROTATION_PICKUP = 0;
 
         public static double ARM_EXTEND_TOP = 210;
         public static double ARM_EXTEND_BOTTOM = 132;
-        public static double ARM_EXTEND_PICKUP = 160;
+        public static double ARM_EXTEND_BACKBOARD = 155;
+        public static double ARM_EXTEND_PICKUP = 150;
+        public static double ARM_EXTEND_PICKUP_STACK = 170;
 
-        public static double ARM_WRIST_UP = -600;
+        public static double ARM_WRIST_UP = -675;
         public static double ARM_WRIST_DOWN = 0;
-        public static double ARM_WRIST_PICKUP = -480;
+        public static double ARM_WRIST_BACKBOARD = -750;
+        public static double ARM_WRIST_PICKUP = -612;
 
         public static double WRIST_LIMIT = 0.5;
 
-        public static long WAIT_BEFORE_UP = 300;
-        public static long WAIT_BEFORE_LOCK = 2000;
+        public static long WAIT_BEFORE_UP = 500;
+        public static long WAIT_BEFORE_LOCK = 1000;
     }
 
     @Config
@@ -165,15 +172,18 @@ public class Constants {
 //            positionMap.put(2, new Translation2d(-91.44, 152));
 
             // Red big
-            positionMap.put(7, new Translation2d(101, -179.5));
+//            positionMap.put(7, new Translation2d(101, -179.5));
             // Red small
             positionMap.put(8, new Translation2d(90.5, -179.5));
 
 
             // Blue big
-            positionMap.put(10, new Translation2d(-101, -179.5));
+//            positionMap.put(10, new Translation2d(-101, -179.5));
             // Blue small
-            positionMap.put(9, new Translation2d(-90.5, -179.5));
+            positionMap.put(9, new Translation2d(-91.44, -179.5));
+
+
+            positionMap.put(2, new Translation2d(-91.44, 152.4));
 
 
             APRILTAG_POSITIONS = Collections.unmodifiableMap(positionMap);

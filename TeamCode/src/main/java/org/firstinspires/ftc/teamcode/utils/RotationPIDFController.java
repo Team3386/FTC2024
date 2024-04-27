@@ -1,10 +1,11 @@
 package org.firstinspires.ftc.teamcode.utils;
 
+import static org.firstinspires.ftc.teamcode.Constants.PI_2;
+
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 
 public class RotationPIDFController extends PIDFController {
-    private static final double PI_2 = Math.PI / 2;
 
     private Rotation2d targetHeading = new Rotation2d();
     private boolean continuous;

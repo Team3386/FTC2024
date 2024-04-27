@@ -19,6 +19,7 @@ public class TempProcessor implements VisionProcessor {
     public final TfodProcessor tfProcessor;
     private final Future<Object> aprilTagFuture;
     private final Future<Object> tfFuture;
+    public boolean tfEnabled = true;
     private boolean aprilTagLockedForAccess;
     private boolean tfLockedForAccess;
 
@@ -50,9 +51,12 @@ public class TempProcessor implements VisionProcessor {
 //        }
 
         aprilTagLockedForAccess = true;
-        tfLockedForAccess = true;
-        tfProcessor.processFrame(frame, captureTimeNanos);
         aprilTagProcessor.processFrame(frame, captureTimeNanos);
+
+        if (tfEnabled) {
+            tfLockedForAccess = true;
+            tfProcessor.processFrame(frame, captureTimeNanos);
+        }
 
         return null;
     }

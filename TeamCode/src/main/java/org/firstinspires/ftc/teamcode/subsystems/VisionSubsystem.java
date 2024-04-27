@@ -17,6 +17,7 @@ import org.firstinspires.ftc.teamcode.utils.TempProcessor;
 import org.firstinspires.ftc.teamcode.utils.ncnnprocessor.DetectedObject;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 
@@ -34,7 +35,9 @@ public class VisionSubsystem extends SubsystemBase {
     private CameraStreamProcessor stream;
     private List<AprilTagDetection> aprilTagResults = new ArrayList<>();
     private List<Recognition> tfResults = new ArrayList<>();
-    private Translation2d visionEstimatedPosition = new Translation2d();
+    private Translation2d lastEstimatedPosition = new Translation2d();
+    private AprilTagPoseFtc lastAprilTagPose;
+    private boolean gotNewDetection = false;
     private boolean fixProp;
 
     private VisionSubsystem() {
@@ -48,7 +51,7 @@ public class VisionSubsystem extends SubsystemBase {
         HardwareMap hardwareMap = GlobalSubsystem.getInstance().hardwareMap;
 
         AprilTagProcessor frontAprilTag = new AprilTagProcessor.Builder().setNumThreads(1).build();
-        frontAprilTag.setPoseSolver(AprilTagProcessor.PoseSolver.OPENCV_ITERATIVE);
+        frontAprilTag.setPoseSolver(AprilTagProcessor.PoseSolver.OPENCV_SQPNP);
 
 //        NcnnProcessor ncnnProcessor = new NcnnProcessor(
 //                "models/nanodet_m-int8.param", "models/nanodet_m-int8.bin",
@@ -91,11 +94,15 @@ public class VisionSubsystem extends SubsystemBase {
                 Optional<AprilTagDetection> detected = aprilTagResults.stream()
                         .filter(det -> VisionConstants.APRILTAG_POSITIONS.containsKey(det.id)).findFirst();
                 if (detected.isPresent()) {
+                    gotNewDetection = true;
+                    lastAprilTagPose = detected.get().ftcPose;
                     Translation2d computedPosition = computePosition(detected.get());
                     if (computedPosition != null) {
-                        visionEstimatedPosition = computedPosition;
-                        robotOdometry.visionResetPosition(computedPosition);
+                        lastEstimatedPosition = computedPosition;
+//                        robotOdometry.visionResetPosition(computedPosition);
                     }
+                } else {
+                    gotNewDetection = false;
                 }
             }
             robotOdometry.resetVisionStore();
@@ -103,7 +110,7 @@ public class VisionSubsystem extends SubsystemBase {
 
         TelemetryPacket fieldPacket = GlobalSubsystem.getInstance().fieldPacket;
 
-        fieldPacket.fieldOverlay().setTranslation(visionEstimatedPosition.getY() * Constants.CENTIMETER_PER_INCH_INVERSE, -visionEstimatedPosition.getX() * Constants.CENTIMETER_PER_INCH_INVERSE);
+        fieldPacket.fieldOverlay().setTranslation(lastEstimatedPosition.getY() * Constants.CENTIMETER_PER_INCH_INVERSE, -lastEstimatedPosition.getX() * Constants.CENTIMETER_PER_INCH_INVERSE);
 
         fieldPacket.fieldOverlay()
                 .setStroke("green")
@@ -150,7 +157,7 @@ public class VisionSubsystem extends SubsystemBase {
 
         TelemetryPacket packet = GlobalSubsystem.getInstance().fieldPacket;
 
-        Translation2d tagRelativeToCamera = new Translation2d(detection.ftcPose.x, detection.ftcPose.y).times(Constants.CENTIMETER_PER_INCH);
+        Translation2d tagRelativeToCamera = new Translation2d(detection.ftcPose.x, detection.ftcPose.y * Constants.CENTIMETER_PER_INCH);
         Translation2d tagRelativeToRobot = tagRelativeToCamera.minus(VisionConstants.CAMERA_POSITION);
         Translation2d tagRelativeToRobotGlobal = tagRelativeToRobot.rotateBy(robotPose.getRotation().unaryMinus());
 
@@ -190,5 +197,14 @@ public class VisionSubsystem extends SubsystemBase {
 
     public void lockProp() {
         fixProp = true;
+        processors.tfEnabled = false;
+    }
+
+    public AprilTagPoseFtc aprilTagPose() {
+        return lastAprilTagPose;
+    }
+
+    public boolean gotNewAprilTag() {
+        return gotNewDetection;
     }
 }

@@ -15,7 +15,7 @@ public class HandSubsystem extends SubsystemBase {
 
     private Telemetry telemetry;
 
-    private boolean leftState, rightState;
+    private boolean leftOpen, rightOpen;
 
     private HandSubsystem() {
     }
@@ -33,42 +33,42 @@ public class HandSubsystem extends SubsystemBase {
 
         rightServo.setInverted(true);
 
-        leftState = false;
-        rightState = false;
+        leftOpen = false;
+        rightOpen = false;
     }
 
-    public void toggleLeftState() {
-        leftState = !leftState;
+    public void toggleLeft() {
+        leftOpen = !leftOpen;
     }
 
-    public void toggleRightState() {
-        rightState = !rightState;
+    public void toggleRight() {
+        rightOpen = !rightOpen;
     }
 
-    public void setLeftState(boolean state) {
-        leftState = state;
+    public void setLeftOpen(boolean state) {
+        leftOpen = state;
     }
 
-    public void setRightState(boolean state) {
-        rightState = state;
+    public void setRightOpen(boolean state) {
+        rightOpen = state;
     }
 
     @Override
     public void periodic() {
         telemetry.addData("Hand: Left", leftServo.getPosition());
         telemetry.addData("Hand: Right", rightServo.getPosition());
-        telemetry.addData("Hand: State left", leftState);
-        telemetry.addData("Hand: State right", rightState);
-        if (leftState) {
+        telemetry.addData("Hand: Open left", leftOpen);
+        telemetry.addData("Hand: Open right", rightOpen);
+        if (leftOpen) {
             leftServo.setPosition(HandConstants.LEFT_OPEN_POSITION);
         } else {
-            leftServo.setPosition(0.6);
+            leftServo.setPosition(0.60);
         }
 
-        if (rightState) {
+        if (rightOpen) {
             rightServo.setPosition(HandConstants.RIGHT_OPEN_POSITION);
         } else {
-            rightServo.setPosition(0.75);
+            rightServo.setPosition(0.80);
         }
     }
 }

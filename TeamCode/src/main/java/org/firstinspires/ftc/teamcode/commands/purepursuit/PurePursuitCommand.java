@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.commands.purepursuit;
 
+import static org.firstinspires.ftc.teamcode.Constants.PI_2;
+
 import android.util.Log;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
@@ -52,15 +54,15 @@ public class PurePursuitCommand extends CommandBase {
     public PurePursuitCommand(List<Point> pointsToVisit) {
         this(
                 new PIDFController(
-                        Constants.AutonomousConstants.POSITION_PID[0],
-                        Constants.AutonomousConstants.POSITION_PID[1],
-                        Constants.AutonomousConstants.POSITION_PID[2],
+                        Constants.AutonomousConstants.X_PID[0],
+                        Constants.AutonomousConstants.X_PID[1],
+                        Constants.AutonomousConstants.X_PID[2],
                         0
                 ),
                 new PIDFController(
-                        Constants.AutonomousConstants.POSITION_PID[0],
-                        Constants.AutonomousConstants.POSITION_PID[1],
-                        Constants.AutonomousConstants.POSITION_PID[2],
+                        Constants.AutonomousConstants.Y_PID[0],
+                        Constants.AutonomousConstants.Y_PID[1],
+                        Constants.AutonomousConstants.Y_PID[2],
                         0
                 ),
                 new RotationPIDFController(
@@ -127,7 +129,9 @@ public class PurePursuitCommand extends CommandBase {
             lastLog = System.nanoTime();
         }
 
-        robotDrive.drive(computedSpeed, true, new Rotation2d());
+        if (!robotDrive.autoOverride) {
+            robotDrive.drive(computedSpeed, true, new Rotation2d(), 1.25);
+        }
 
         displayOnField();
     }
@@ -177,7 +181,18 @@ public class PurePursuitCommand extends CommandBase {
 
         final double distanceToTarget = Math.abs(robotPose.getTranslation().getDistance(targetPose.getTranslation()));
 
-        if (distanceToTarget < advancePointThreshold && commandDidFinish && pointIndex != pointsToVisit.size() - 1) {
+        boolean rotationAligned = true;
+        if (!targetPoint.translationOnly()) {
+            Rotation2d rotationError = targetPose.getRotation().minus(robotPose.getRotation());
+            if (Math.abs(rotationError.getRadians()) > PI_2) {
+                rotationError = new Rotation2d(rotationError.getRadians() - Math.copySign(Math.PI, rotationError.getRadians()));
+            }
+            if (Math.abs(rotationError.getDegrees()) > 5) {
+                rotationAligned = false;
+            }
+        }
+
+        if (distanceToTarget < advancePointThreshold && rotationAligned && commandDidFinish && pointIndex != pointsToVisit.size() - 1) {
             Log.i("PurePursuit", String.format("Distance to target: %f < %f, advancing point...", distanceToTarget, advancePointThreshold));
             // Switch to the next point once in range
             pointIndex++;

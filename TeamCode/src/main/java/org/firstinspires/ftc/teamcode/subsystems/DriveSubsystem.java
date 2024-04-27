@@ -27,6 +27,7 @@ public class DriveSubsystem extends SubsystemBase {
     private static MotorEx rearRight;
     private static RevIMU imu;
     private static ChassisSpeeds targetChassisSpeeds = new ChassisSpeeds();
+    public boolean autoOverride = false;
 
     private DriveSubsystem() {
     }
@@ -63,13 +64,21 @@ public class DriveSubsystem extends SubsystemBase {
 
         imu = new RevIMU(globalSubsystem.hardwareMap, "navx");
         imu.invertGyro();
+
+        autoOverride = false;
     }
 
-    public void drive(ChassisSpeeds chassisSpeeds, boolean fieldRelative, Rotation2d rotateBy) {
+    public void drive(ChassisSpeeds chassisSpeeds, boolean fieldRelative, Rotation2d rotateBy, double perpFactor) {
         targetChassisSpeeds = fieldRelative ?
                 fromFieldRelativeSpeeds(
                         chassisSpeeds, odometry.getPoseMeters().getRotation().plus(rotateBy))
                 : chassisSpeeds;
+
+        targetChassisSpeeds.vxMetersPerSecond *= perpFactor;
+    }
+
+    public void drive(ChassisSpeeds chassisSpeeds, boolean fieldRelative, Rotation2d rotateBy) {
+        drive(chassisSpeeds, fieldRelative, rotateBy, 1);
     }
 
     private ChassisSpeeds fromFieldRelativeSpeeds(ChassisSpeeds chassisSpeeds, Rotation2d robotAngle) {
